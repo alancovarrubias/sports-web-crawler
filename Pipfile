@@ -4,9 +4,12 @@ url = "https://pypi.org/simple"
 verify_ssl = true
 
 [packages]
+flask-api = "*"
+flask = "*"
+flask-restful = "*"
+numpy = "*"
 selenium = "*"
 webdriver-manager = "*"
-numpy = "*"
 
 [requires]
 python_version = "3.7"

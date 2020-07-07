@@ -18,28 +18,31 @@ class Scraper:
         url = os.path.join('https://www.basketball-reference.com', endpoint)
         self.driver.get(url)
 
-    def get_teams(self, year):
-        self.get(f'leagues/NBA_{year}_standings.html')
+    def get_teams(self, season):
+        self.get(f'leagues/NBA_{season}_standings.html')
         teams_table = self.driver.find_element_by_id(
-            'all_team_vs_team').find_element_by_tag_name('tbody')
+            'team_vs_team').find_element_by_tag_name('tbody')
+
         rows = teams_table.find_elements_by_tag_name('tr')
+        cell_rows = [row.find_elements_by_tag_name('td') for row in rows]
+        cell_rows = [row for row in cell_rows if row]
 
         def get_team(row):
             team = {}
-            cells = row.find_elements_by_tag_name('td')
-            text_array = cells[0].text.split()
+            text_array = row[0].text.split()
+            print(row[0].text)
             if text_array[-1] == "Blazers":
                 team['name'] = ' '.join(text_array[1:])
                 team['city'] = text_array[0]
             else:
                 team['name'] = text_array[-1]
                 team['city'] = ' '.join(text_array[:-1])
-            team['abbr'] = self.__get_team_abbr(cells[0])
+            team['abbr'] = self.__get_team_abbr(row[0])
             return team
-        return [get_team(row) for row in rows]
+        return [get_team(row) for row in cell_rows]
 
-    def get_players(self, year, team):
-        self.get(f'teams/{team}/{year}.html')
+    def get_players(self, season, team):
+        self.get(f'teams/{team}/{season}.html')
         players_table = self.driver.find_element_by_id(
             'roster').find_element_by_tag_name('tbody')
         rows = players_table.find_elements_by_tag_name('tr')
@@ -54,12 +57,12 @@ class Scraper:
 
         return [get_player(row) for row in rows]
 
-    def get_games(self, year):
+    def get_games(self, season):
         months = ('October', 'November', 'December', 'January',
                   'February', 'March', 'April', 'June')
 
         def get_month_games(month):
-            self.get(f'leagues/NBA_{year}_games-{month.lower()}.html')
+            self.get(f'leagues/NBA_{season}_games-{month.lower()}.html')
             games_table = self.driver.find_element_by_id(
                 'schedule').find_element_by_tag_name('tbody')
             rows = games_table.find_elements_by_css_selector(
