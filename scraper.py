@@ -89,6 +89,53 @@ class Scraper:
 			games += month_games
 
 		return games
+	
+	def get_stats(self, game_url, home_team, away_team):
+		self.get(f'boxscores/{game_url}.html')
+		def get_team_stats(team):
+			team_stats = {}
+			basic_stats_table = self.driver.find_element_by_id(f'box-{team}-game-basic')
+			advanced_stats_table = self.driver.find_element_by_id(f'box-{team}-game-advanced')
+			basic_rows = basic_stats_table.find_element_by_tag_name('tbody').find_elements_by_tag_name('tr')
+			advanced_rows = advanced_stats_table.find_element_by_tag_name('tbody').find_elements_by_tag_name('tr')
+			for row in basic_rows:
+				cells = row.find_elements_by_tag_name('td')
+				if len(cells) <= 1:
+					continue
+				player = row.find_element_by_tag_name('th').get_attribute('data-append-csv')
+				data = [cell.text for cell in cells]
+				team_stat = {}
+				team_stat['player'] = player
+				team_stat['team'] = team
+				mp = data[0].split(':')
+				team_stat['sp'] = int(mp[0])*60 + int(mp[1])
+				team_stat['fg'] = int(data[1])
+				team_stat['fga'] = int(data[2])
+				team_stat['fg3'] = int(data[4])
+				team_stat['fg3a'] = int(data[5])
+				team_stat['ft'] = int(data[7])
+				team_stat['fta'] = int(data[8])
+				team_stat['orb'] = int(data[10])
+				team_stat['drb'] = int(data[11])
+				team_stat['ast'] = int(data[13])
+				team_stat['stl'] = int(data[14])
+				team_stat['blk'] = int(data[15])
+				team_stat['tov'] = int(data[16])
+				team_stat['pf'] = int(data[17])
+				team_stat['pts'] = int(data[18])
+				team_stats[player] = team_stat
+			for row in advanced_rows:
+				cells = row.find_elements_by_tag_name('td')
+				if len(cells) <= 1:
+					continue
+				player = row.find_element_by_tag_name('th').get_attribute('data-append-csv')
+				data = [cell.text for cell in cells]
+				team_stats[player]['ortg'] = data[13]
+				team_stats[player]['drtg'] = data[14]
+			return list(team_stats.values())
+		home_team_stats = get_team_stats(home_team)
+		away_team_stats = get_team_stats(home_team)
+		return home_team_stats + away_team_stats
 
 	def __get_team_abbr(self, cell): return cell.find_element_by_tag_name(
 		'a').get_attribute('href').split('/')[-2]
