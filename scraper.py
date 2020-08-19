@@ -131,7 +131,7 @@ class Scraper:
 			team_stat = build_basic_stat(basic_team_row)
 			add_advanced_stat(advanced_team_row, team_stat)
 			team_stat['model_type'] = 'Team'
-			team_stat['model'] = team
+			team_stat['abbr'] = team
 			return team_stat
 
 		def get_player_stats(team):
@@ -147,7 +147,8 @@ class Scraper:
 				player = row.find_element_by_tag_name('th').get_attribute('data-append-csv')
 				player_stat = build_basic_stat(row)
 				player_stat['model_type'] = 'Player'
-				player_stat['model'] = player
+				player_stat['abbr'] = player
+				player_stat['team'] = team
 				player_stats[player] = player_stat
 			for row in advanced_rows:
 				cells = row.find_elements_by_tag_name('td')
