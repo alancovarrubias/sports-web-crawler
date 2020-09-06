@@ -1,10 +1,10 @@
 from flask import Flask
 from flask_restful import reqparse, abort, Api, Resource
-from scraper import Scraper
+from scrapers import ScraperFactory
 
 app = Flask(__name__)
 api = Api(app)
-scraper = Scraper()
+scraper_factory = ScraperFactory()
 
 
 def abort_if_keys_dont_exist(args, keys):
@@ -34,6 +34,7 @@ class TeamList(Resource):
         if TEAMS.get(season):
             return TEAMS[season]
 
+        scraper = scraper_factory.get_scraper('NBA')
         teams = scraper.get_teams(season)
         TEAMS[season] = teams
         return teams
@@ -55,6 +56,7 @@ class PlayerList(Resource):
         elif not PLAYERS.get(season) == {}:
             PLAYERS[season] = {}
 
+        scraper = scraper_factory.get_scraper('NBA')
         players = scraper.get_players(season, team)
         PLAYERS[season][team] = players
         return players
@@ -74,11 +76,14 @@ class GameList(Resource):
         if GAMES.get(season):
             return GAMES[season]
 
+        scraper = scraper_factory.get_scraper('NBA')
         games = scraper.get_games(season)
         GAMES[season] = games
         return games
 
+
 STATS = {}
+
 
 class StatList(Resource):
     def get(self):
@@ -91,9 +96,11 @@ class StatList(Resource):
         if STATS.get(game_url):
             return STATS[game_url]
 
+        scraper = scraper_factory.get_scraper('NBA')
         stats = scraper.get_stats(game_url, home_team, away_team)
         STATS[game_url] = stats
         return stats
+
 
 ##
 # Actually setup the Api resource routing here
