@@ -16,7 +16,6 @@ class AbstractScraper(ABC):
 
     def get(self, endpoint):
         url = os.path.join(self.base_url, endpoint)
-        print(url)
         self.driver.get(url)
 
     @abstractmethod

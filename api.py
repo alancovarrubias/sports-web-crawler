@@ -34,9 +34,9 @@ class TeamResource(Resource):
             return TEAMS.get(args)
 
         scraper = scraper_factory.get_scraper(args)
-        teams = scraper.get_teams(args)
-        TEAMS.set(args, teams)
-        return teams
+        teams_data = scraper.get_teams(args)
+        TEAMS.set(args, teams_data)
+        return teams_data
 
 
 PLAYERS = Datastore('Player')
@@ -50,9 +50,9 @@ class PlayerResource(Resource):
             return PLAYERS.get(args)
 
         scraper = scraper_factory.get_scraper(args)
-        teams = scraper.get_players(args)
-        PLAYERS.set(args, teams)
-        return teams
+        players_data = scraper.get_players(args)
+        PLAYERS.set(args, players_data)
+        return players_data
 
 
 GAME_KEYS = ['sport', 'season']
@@ -68,9 +68,9 @@ class GameResource(Resource):
             return GAMES.get(args)
 
         scraper = scraper_factory.get_scraper(args)
-        games = scraper.get_games(args)
-        GAMES.set(args, games)
-        return games
+        games_data = scraper.get_games(args)
+        GAMES.set(args, games_data)
+        return games_data
 
 
 STAT_KEYS = ['sport', 'game_url', 'home_team', 'away_team']
@@ -86,9 +86,9 @@ class StatResource(Resource):
             return STATS.get(args)
 
         scraper = scraper_factory.get_scraper(args)
-        stats = scraper.get_stats(args)
-        STATS.set(args, stats)
-        return stats
+        stats_data = scraper.get_stats(args)
+        STATS.set(args, stats_data)
+        return stats_data
 
 
 api.add_resource(TeamResource, '/teams')

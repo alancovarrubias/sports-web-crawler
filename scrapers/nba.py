@@ -28,7 +28,8 @@ class NbaScraper(AbstractScraper):
                 team['name'] = ' '.join(words[-1:])
                 team['city'] = ' '.join(words[:-1])
             return team
-        return [get_team(row) for row in table_rows]
+        teams = [get_team(row) for row in table_rows]
+        return {'teams': teams}
 
     def get_players(self, args):
         season = args['season']
@@ -43,11 +44,12 @@ class NbaScraper(AbstractScraper):
             link = anchor.get_attribute('href')
             player = {}
             player['name'] = anchor.text
-            player['abbr'] = re.search("\w*\d{2}", link).group()
+            player['abbr'] = re.search(r"\w*\d{2}", link).group()
             player['position'] = row[1].text
             return player
 
-        return [get_player(row) for row in table_rows]
+        players = [get_player(row) for row in table_rows]
+        return {'players': players}
 
     def get_games(self, args):
         season = args['season']
@@ -86,7 +88,7 @@ class NbaScraper(AbstractScraper):
             month_games = [get_game(row) for row in table_rows]
             games += month_games
 
-        return games
+        return {'games': games}
 
     def get_stats(self, args):
         game_url = args['game_url']

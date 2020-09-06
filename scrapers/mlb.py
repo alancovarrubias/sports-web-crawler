@@ -21,14 +21,15 @@ class MlbScraper(AbstractScraper):
             words = title.split(' ')
             team = {}
             team['abbr'] = anchor.text
-            if re.search("Sox|Jays", title):
+            if re.search(r"Sox|Jays", title):
                 team['name'] = ' '.join(words[-2:])
                 team['city'] = ' '.join(words[:-2])
             else:
                 team['name'] = ' '.join(words[-1:])
                 team['city'] = ' '.join(words[:-1])
             return team
-        return [get_team(row) for row in table_rows]
+        teams = [get_team(row) for row in table_rows]
+        return {'teams': teams}
 
     def get_players(self, args):
         season = args['season']
@@ -46,12 +47,14 @@ class MlbScraper(AbstractScraper):
             player['position'] = row[0].text
             return player
 
-        return [get_player(row) for row in table_rows]
+        players = [get_player(row) for row in table_rows]
+        return {'players': players}
 
     def get_games(self, args):
         season = args['season']
         teams = args['teams'].split(',')
         games = []
+        team_links = {}
         for team in teams:
             self.get(f'teams/{team}/{season}-schedule-scores.shtml')
             games_table = self.driver.find_element_by_id('team_schedule')
@@ -61,11 +64,16 @@ class MlbScraper(AbstractScraper):
                 if away:
                     continue
                 game = {}
+                game_link = row[1].find_element_by_tag_name(
+                    'a').get_attribute('href')
+                if team not in team_links:
+                    team_links[team] = re.search(
+                        r"[A-Z]{3}", game_link).group()
                 game['date'] = row[0].get_attribute('csk')
                 game['home_team'] = team
                 game['away_team'] = row[4].text
                 games.append(game)
-        return games
+        return {'games': games, 'team_links': team_links}
 
     def get_stats(self):
         pass
