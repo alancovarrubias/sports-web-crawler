@@ -2,6 +2,7 @@ from operator import methodcaller
 import re
 # local
 from .abstract import AbstractScraper
+from .helpers import get_table_rows
 
 
 class NbaScraper(AbstractScraper):
@@ -13,10 +14,8 @@ class NbaScraper(AbstractScraper):
         season = args['season']
         self.get(f'leagues/NBA_{season}_standings.html')
         teams_table = self.driver.find_element_by_id(
-            'team_vs_team').find_element_by_tag_name('tbody')
-        rows = teams_table.find_elements_by_tag_name('tr')
-        cell_rows = [row.find_elements_by_tag_name('td') for row in rows]
-        cell_rows = [row for row in cell_rows if row]
+            'team_vs_team')
+        cell_rows = get_table_rows(teams_table)
 
         def get_team(row):
             team = {}
