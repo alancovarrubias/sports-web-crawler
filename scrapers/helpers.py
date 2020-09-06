@@ -3,3 +3,7 @@ def get_table_rows(table):
     rows = teams_body.find_elements_by_tag_name('tr')
     cell_rows = [row.find_elements_by_tag_name('td') for row in rows]
     return [row for row in cell_rows if row]
+
+
+def get_team_abbr(cell): return cell.find_element_by_tag_name(
+    'a').get_attribute('href').split('/')[-2]

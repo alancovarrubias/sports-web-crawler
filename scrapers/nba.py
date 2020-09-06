@@ -1,8 +1,7 @@
 from operator import methodcaller
 import re
-# local
 from .abstract import AbstractScraper
-from .helpers import get_table_rows
+from .helpers import get_table_rows, get_team_abbr
 
 
 class NbaScraper(AbstractScraper):
@@ -26,7 +25,7 @@ class NbaScraper(AbstractScraper):
             else:
                 team['name'] = text_array[-1]
                 team['city'] = ' '.join(text_array[:-1])
-            team['abbr'] = self.__get_team_abbr(row[0])
+            team['abbr'] = get_team_abbr(row[0])
             return team
         return [get_team(row) for row in table_rows]
 
@@ -78,8 +77,8 @@ class NbaScraper(AbstractScraper):
                 game['year'] = int(date_array[-1])
                 game['month'] = month['numeric']
                 game['day'] = int(date_array[1].split()[-1])
-                game['away_team'] = self.__get_team_abbr(cells[1])
-                game['home_team'] = self.__get_team_abbr(cells[3])
+                game['away_team'] = get_team_abbr(cells[1])
+                game['home_team'] = get_team_abbr(cells[3])
                 return game
 
             month_games = [get_game(row) for row in rows]
@@ -176,6 +175,3 @@ class NbaScraper(AbstractScraper):
         stats.append(away_team_stat)
         stats.append(home_team_stat)
         return stats
-
-    def __get_team_abbr(self, cell): return cell.find_element_by_tag_name(
-        'a').get_attribute('href').split('/')[-2]
