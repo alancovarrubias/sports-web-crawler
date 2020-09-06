@@ -68,23 +68,22 @@ class NbaScraper(AbstractScraper):
             lowercased = month['text'].lower()
             self.get(f'leagues/NBA_{season}_games-{lowercased}.html')
             games_table = self.driver.find_element_by_id(
-                'schedule').find_element_by_tag_name('tbody')
-            rows = games_table.find_elements_by_css_selector(
-                'tr:not(.thead)')
+                'schedule')
+            table_rows = get_table_rows(
+                games_table, {'rows': 'tr:not(.thead)', 'cells': 'th, td'})
 
             def get_game(row):
-                date = row.find_element_by_tag_name('th').text
+                date = row[0].text
                 date_array = list(map(methodcaller('strip'), date.split(',')))
-                cells = row.find_elements_by_tag_name('td')
                 game = {}
                 game['year'] = int(date_array[-1])
                 game['month'] = month['numeric']
                 game['day'] = int(date_array[1].split()[-1])
-                game['away_team'] = get_team_abbr(cells[1])
-                game['home_team'] = get_team_abbr(cells[3])
+                game['away_team'] = get_team_abbr(row[2])
+                game['home_team'] = get_team_abbr(row[4])
                 return game
 
-            month_games = [get_game(row) for row in rows]
+            month_games = [get_game(row) for row in table_rows]
             games += month_games
 
         return games

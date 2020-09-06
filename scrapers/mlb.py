@@ -13,7 +13,7 @@ class MlbScraper(AbstractScraper):
         season = args['season']
         self.get(f'leagues/MLB/{season}.shtml')
         teams_table = self.driver.find_element_by_id('teams_standard_batting')
-        table_rows = get_table_rows(teams_table, 'th')[:-1]
+        table_rows = get_table_rows(teams_table, {'cells': 'th'})[:-1]
 
         def get_team(row):
             anchor = row[0].find_element_by_tag_name('a')
@@ -50,8 +50,22 @@ class MlbScraper(AbstractScraper):
 
     def get_games(self, args):
         season = args['season']
-        self.get(f'teams/ATL/2019-schedule-scores.shtml')
-        pass
+        teams = args['teams'].split(',')
+        games = []
+        for team in teams:
+            self.get(f'teams/{team}/{season}-schedule-scores.shtml')
+            games_table = self.driver.find_element_by_id('team_schedule')
+            rows = get_table_rows(games_table, {'rows': 'tr:not(.thead)'})
+            for row in rows:
+                away = row[3].text == '@'
+                if away:
+                    continue
+                game = {}
+                game['date'] = row[0].get_attribute('csk')
+                game['home_team'] = team
+                game['away_team'] = row[4].text
+                games.append(game)
+        return games
 
     def get_stats(self):
         pass

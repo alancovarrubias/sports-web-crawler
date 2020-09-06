@@ -91,9 +91,6 @@ class StatResource(Resource):
         return stats
 
 
-##
-# Actually setup the Api resource routing here
-##
 api.add_resource(TeamResource, '/teams')
 api.add_resource(PlayerResource, '/players')
 api.add_resource(GameResource, '/games')
