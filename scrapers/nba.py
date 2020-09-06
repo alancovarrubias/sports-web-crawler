@@ -18,14 +18,15 @@ class NbaScraper(AbstractScraper):
 
         def get_team(row):
             team = {}
-            text_array = row[0].text.split()
-            if text_array[-1] == "Blazers":
-                team['name'] = ' '.join(text_array[1:])
-                team['city'] = text_array[0]
-            else:
-                team['name'] = text_array[-1]
-                team['city'] = ' '.join(text_array[:-1])
+            team_text = row[0].text
+            words = team_text.split()
             team['abbr'] = get_team_abbr(row[0])
+            if re.search("Blazers", team_text):
+                team['name'] = ' '.join(words[1:])
+                team['city'] = ' '.join(words[:1])
+            else:
+                team['name'] = ' '.join(words[-1:])
+                team['city'] = ' '.join(words[:-1])
             return team
         return [get_team(row) for row in table_rows]
 
