@@ -48,7 +48,9 @@ class MlbScraper(AbstractScraper):
 
         return [get_player(row) for row in table_rows]
 
-    def get_games(self):
+    def get_games(self, args):
+        season = args['season']
+        self.get(f'teams/ATL/2019-schedule-scores.shtml')
         pass
 
     def get_stats(self):

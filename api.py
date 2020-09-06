@@ -1,90 +1,91 @@
 from flask import Flask
 from flask_restful import reqparse, abort, Api, Resource
 from scrapers import ScraperFactory
-from nested_mem_cache import NestedMemCache
+from datastore import Datastore
 
 app = Flask(__name__)
 api = Api(app)
 scraper_factory = ScraperFactory()
 
 
-def abort_if_keys_dont_exist(args, keys):
-    args = {k: v for k, v in args.items() if v is not None}
-    arg_keys = list(args.keys())
-    for key in keys:
-        if key not in arg_keys:
-            abort(404, message="Required arguments %s" % keys)
+def abort_if_invalid(datastore, args):
+    if not datastore.validate_args(args):
+        abort(404, message="Required arguments %s" %
+              datastore.required_keys(args))
 
 
 parser = reqparse.RequestParser()
 parser.add_argument('sport', type=str, location='args')
 parser.add_argument('season', type=int, location='args')
 parser.add_argument('team', type=str, location='args')
+parser.add_argument('teams', type=str, location='args')
 parser.add_argument('game_url', type=str, location='args')
 parser.add_argument('away_team', type=str, location='args')
 parser.add_argument('home_team', type=str, location='args')
 
-TEAMS = NestedMemCache(['sport', 'season'])
+TEAMS = Datastore('Team')
 
 
 class TeamResource(Resource):
     def get(self):
         args = parser.parse_args()
-        abort_if_keys_dont_exist(args, TEAMS.keys)
-        if TEAMS.check(args):
+        abort_if_invalid(TEAMS, args)
+        if TEAMS.exists(args):
             return TEAMS.get(args)
 
-        scraper = scraper_factory.get_scraper(args['sport'])
+        scraper = scraper_factory.get_scraper(args)
         teams = scraper.get_teams(args)
         TEAMS.set(args, teams)
         return teams
 
 
-PLAYERS = NestedMemCache(['sport', 'season', 'team'])
+PLAYERS = Datastore('Player')
 
 
 class PlayerResource(Resource):
     def get(self):
         args = parser.parse_args()
-        abort_if_keys_dont_exist(args, PLAYERS.keys)
-        if PLAYERS.check(args):
+        abort_if_invalid(PLAYERS, args)
+        if PLAYERS.exists(args):
             return PLAYERS.get(args)
 
-        scraper = scraper_factory.get_scraper(args['sport'])
+        scraper = scraper_factory.get_scraper(args)
         teams = scraper.get_players(args)
         PLAYERS.set(args, teams)
         return teams
 
 
-GAMES = NestedMemCache(['sport', 'season'])
+GAME_KEYS = ['sport', 'season']
+GAMES = Datastore('Game')
 
 
 class GameResource(Resource):
     def get(self):
         args = parser.parse_args()
-        abort_if_keys_dont_exist(args, GAMES.keys)
+        abort_if_invalid(GAMES, args)
 
-        if GAMES.check(args):
+        if GAMES.exists(args):
             return GAMES.get(args)
 
-        scraper = scraper_factory.get_scraper(args['sport'])
+        scraper = scraper_factory.get_scraper(args)
         games = scraper.get_games(args)
         GAMES.set(args, games)
         return games
 
 
-STATS = NestedMemCache(['sport', 'game_url', 'home_team', 'away_team'])
+STAT_KEYS = ['sport', 'game_url', 'home_team', 'away_team']
+STATS = Datastore('Stat')
 
 
 class StatResource(Resource):
     def get(self):
         args = parser.parse_args()
-        abort_if_keys_dont_exist(args, GAMES.keys)
+        abort_if_invalid(STATS, args)
 
-        if STATS.check(args):
+        if STATS.exists(args):
             return STATS.get(args)
 
-        scraper = scraper_factory.get_scraper(args['sport'])
+        scraper = scraper_factory.get_scraper(args)
         stats = scraper.get_stats(args)
         STATS.set(args, stats)
         return stats
