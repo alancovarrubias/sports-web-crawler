@@ -34,16 +34,16 @@ class MlbScraper(AbstractScraper):
         season = args['season']
         team = args['team']
 
-        self.get(f'teams/{team}/{season}.html')
-        players_table = self.driver.find_element_by_id(
-            'roster')
+        self.get(f'teams/{team}/{season}.shtml')
+        players_table = self.driver.find_element_by_id('team_batting')
+
         table_rows = get_table_rows(players_table)
 
         def get_player(row):
             player = {}
-            player['name'] = row[0].text
-            player['abbr'] = row[0].get_attribute('data-append-csv')
-            player['position'] = row[1].text
+            player['name'] = row[1].find_element_by_tag_name('a').text
+            player['abbr'] = row[1].get_attribute('data-append-csv')
+            player['position'] = row[0].text
             return player
 
         return [get_player(row) for row in table_rows]
