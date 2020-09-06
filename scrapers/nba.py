@@ -2,6 +2,19 @@ from operator import methodcaller
 import re
 from .abstract import AbstractScraper
 from .helpers import get_table_rows, get_team_abbr
+from data_classes.nba_stat import NbaStat
+
+MONTHS = (
+    {'text': 'October', 'numeric': 10},
+    {'text': 'November', 'numeric': 11},
+    {'text': 'December', 'numeric': 12},
+    {'text': 'January', 'numeric': 1},
+    {'text': 'February', 'numeric': 2},
+    {'text': 'March', 'numeric': 3},
+    {'text': 'April', 'numeric': 4},
+    {'text': 'May', 'numeric': 5},
+    {'text': 'June', 'numeric': 6}
+)
 
 
 class NbaScraper(AbstractScraper):
@@ -12,8 +25,7 @@ class NbaScraper(AbstractScraper):
     def get_teams(self, args):
         season = args['season']
         self.get(f'leagues/NBA_{season}_standings.html')
-        teams_table = self.driver.find_element_by_id(
-            'team_vs_team')
+        teams_table = self.driver.find_element_by_id(team_vs_team')
         table_rows = get_table_rows(teams_table)
 
         def get_team(row):
@@ -28,6 +40,7 @@ class NbaScraper(AbstractScraper):
                 team['name'] = ' '.join(words[-1:])
                 team['city'] = ' '.join(words[:-1])
             return team
+
         teams = [get_team(row) for row in table_rows]
         return {'teams': teams}
 
@@ -53,26 +66,14 @@ class NbaScraper(AbstractScraper):
 
     def get_games(self, args):
         season = args['season']
-        months = (
-            {'text': 'October', 'numeric': 10},
-            {'text': 'November', 'numeric': 11},
-            {'text': 'December', 'numeric': 12},
-            {'text': 'January', 'numeric': 1},
-            {'text': 'February', 'numeric': 2},
-            {'text': 'March', 'numeric': 3},
-            {'text': 'April', 'numeric': 4},
-            {'text': 'May', 'numeric': 5},
-            {'text': 'June', 'numeric': 6}
-        )
 
         games = []
-        for month in months:
+        for month in MONTHS:
             lowercased = month['text'].lower()
             self.get(f'leagues/NBA_{season}_games-{lowercased}.html')
-            games_table = self.driver.find_element_by_id(
-                'schedule')
-            table_rows = get_table_rows(
-                games_table, {'rows': 'tr:not(.thead)', 'cells': 'th, td'})
+            games_table = self.driver.find_element_by_id('schedule')
+            css_config = {'rows': 'tr:not(.thead)', 'cells': 'th, td'}
+            table_rows = get_table_rows(games_table, css_config)
 
             def get_game(row):
                 date = row[0].text
@@ -96,86 +97,37 @@ class NbaScraper(AbstractScraper):
         away_team = args['away_team']
         self.get(f'boxscores/{game_url}.html')
 
-        def add_advanced_stat(row, stat):
-            cells = row.find_elements_by_tag_name('td')
-            data = [cell.text for cell in cells]
-            stat['ortg'] = data[13]
-            stat['drtg'] = data[14]
-
-        def build_basic_stat(row):
-            stat = {}
-            cells = row.find_elements_by_tag_name('td')
-            data = [cell.text for cell in cells]
-            mp = data[0].split(':')
-            if (len(mp) == 1):
-                stat['sp'] = int(mp[0])*60
-            else:
-                stat['sp'] = int(mp[0])*60 + int(mp[1])
-            stat['fg'] = int(data[1])
-            stat['fga'] = int(data[2])
-            stat['fg3'] = int(data[4])
-            stat['fg3a'] = int(data[5])
-            stat['ft'] = int(data[7])
-            stat['fta'] = int(data[8])
-            stat['orb'] = int(data[10])
-            stat['drb'] = int(data[11])
-            stat['ast'] = int(data[13])
-            stat['stl'] = int(data[14])
-            stat['blk'] = int(data[15])
-            stat['tov'] = int(data[16])
-            stat['pf'] = int(data[17])
-            stat['pts'] = int(data[18])
-            return stat
+        def get_team_table_rows(team, css_config):
+            basic_stats_table = self.driver.find_element_by_id(
+                f'box-{team}-game-basic')
+            basic_rows = get_table_rows(basic_stats_table, css_config)
+            advanced_stats_table = self.driver.find_element_by_id(
+                f'box-{team}-game-advanced')
+            advanced_rows = get_table_rows(
+                advanced_stats_table, css_config)
+            return basic_rows, advanced_rows
 
         def get_team_stat(team):
-            basic_stats_table = self.driver.find_element_by_id(
-                f'box-{team}-game-basic')
-            advanced_stats_table = self.driver.find_element_by_id(
-                f'box-{team}-game-advanced')
-            basic_team_row = basic_stats_table.find_element_by_tag_name(
-                'tfoot').find_element_by_tag_name('tr')
-            advanced_team_row = advanced_stats_table.find_element_by_tag_name(
-                'tfoot').find_element_by_tag_name('tr')
-            team_stat = build_basic_stat(basic_team_row)
-            add_advanced_stat(advanced_team_row, team_stat)
-            team_stat['model_type'] = 'Team'
-            team_stat['abbr'] = team
-            return team_stat
+            css_config = {'section': 'tfoot', 'cells': 'th, td'}
+            basic_rows, advanced_rows = get_team_table_rows(team, css_config)
+            team_stat = NbaStat('Team')
+            team_stat.add_row_data(basic_rows[0], advanced_rows[0])
+            return team_stat.toJson()
 
         def get_player_stats(team):
-            player_stats = {}
-            basic_stats_table = self.driver.find_element_by_id(
-                f'box-{team}-game-basic')
-            advanced_stats_table = self.driver.find_element_by_id(
-                f'box-{team}-game-advanced')
-            basic_rows = basic_stats_table.find_element_by_tag_name(
-                'tbody').find_elements_by_tag_name('tr')
-            advanced_rows = advanced_stats_table.find_element_by_tag_name(
-                'tbody').find_elements_by_tag_name('tr')
-            for row in basic_rows:
-                cells = row.find_elements_by_tag_name('td')
-                if len(cells) <= 1:
+            css_config = {'rows': 'tr:not(.thead)', 'cells': 'th, td'}
+            basic_rows, advanced_rows = get_team_table_rows(team, css_config)
+            player_stats = []
+            for basic_row, advanced_row in zip(basic_rows, advanced_rows):
+                if len(basic_row) <= 2:
                     continue
-                player = row.find_element_by_tag_name(
-                    'th').get_attribute('data-append-csv')
-                player_stat = build_basic_stat(row)
-                player_stat['model_type'] = 'Player'
-                player_stat['abbr'] = player
-                player_stat['team'] = team
-                player_stats[player] = player_stat
-            for row in advanced_rows:
-                cells = row.find_elements_by_tag_name('td')
-                if len(cells) <= 1:
-                    continue
-                player = row.find_element_by_tag_name(
-                    'th').get_attribute('data-append-csv')
-                add_advanced_stat(row, player_stats[player])
-            return list(player_stats.values())
+                player_stat = NbaStat('Player')
+                player_stat.add_row_data(basic_row, advanced_row)
+                player_stats.append(player_stat.toJson())
+            return player_stats
+
         away_player_stats = get_player_stats(away_team)
         home_player_stats = get_player_stats(home_team)
-        stats = away_player_stats + home_player_stats
         away_team_stat = get_team_stat(away_team)
         home_team_stat = get_team_stat(home_team)
-        stats.append(away_team_stat)
-        stats.append(home_team_stat)
-        return stats
+        return {'away_player_stats': away_player_stats, 'home_player_stats': home_player_stats, 'away_team_stat': away_team_stat, 'home_team_stat': home_team_stat}

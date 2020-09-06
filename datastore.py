@@ -4,13 +4,13 @@ KEYS = {
         'Team': ['sport', 'season'],
         'Player': ['sport', 'season', 'team'],
         'Game': ['sport', 'season'],
-        'Stat': []
+        'Stat': ['sport', 'game_url', 'home_team', 'away_team']
     },
     'MLB': {
         'Team': ['sport', 'season'],
         'Player': ['sport', 'season', 'team'],
         'Game': ['sport', 'season', 'teams'],
-        'Stat': []
+        'Stat': ['sport', 'game_url', 'home_team', 'away_team']
     }
 }
 
@@ -21,7 +21,7 @@ class Datastore:
         self.datastore = {}
 
     def validate_args(self, args):
-        if args['sport'] not in SPORTS:
+        if args['sport'] is None:
             return False
         keys = self.required_keys(args)
         args = {k: v for k, v in args.items() if v is not None}

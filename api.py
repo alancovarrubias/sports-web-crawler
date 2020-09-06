@@ -10,8 +10,12 @@ scraper_factory = ScraperFactory()
 
 def abort_if_invalid(datastore, args):
     if not datastore.validate_args(args):
-        abort(404, message="Required arguments %s" %
-              datastore.required_keys(args))
+        print("WHOOPs")
+        if args['sport'] is None:
+            message = "Missing sports argument"
+        else:
+            message = "Required arguments %s" % datastore.required_keys(args)
+        abort(404, message=message)
 
 
 parser = reqparse.RequestParser()
@@ -73,7 +77,6 @@ class GameResource(Resource):
         return games_data
 
 
-STAT_KEYS = ['sport', 'game_url', 'home_team', 'away_team']
 STATS = Datastore('Stat')
 
 
@@ -81,6 +84,7 @@ class StatResource(Resource):
     def get(self):
         args = parser.parse_args()
         abort_if_invalid(STATS, args)
+        print("HEY")
 
         if STATS.exists(args):
             return STATS.get(args)

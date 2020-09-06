@@ -75,5 +75,38 @@ class MlbScraper(AbstractScraper):
                 games.append(game)
         return {'games': games, 'team_links': team_links}
 
-    def get_stats(self):
-        pass
+    def get_stats(self, args):
+        game_url = args['game_url']
+        home_team = args['home_team'].replace(" ", "")
+        away_team = args['away_team'].replace(" ", "")
+        self.get(f'boxes/{game_url}.shtml')
+        away_team_batting_table = self.driver.find_element_by_id(
+            f'{away_team}batting')
+        away_team_batting_rows = get_table_rows(
+            away_team_batting_table, {'cells': 'th, td'})
+        home_team_batting_table = self.driver.find_element_by_id(
+            f'{home_team}batting')
+        home_team_batting_rows = get_table_rows(
+            home_team_batting_table, {'cells': 'th, td'})
+        away_team_pitching_table = self.driver.find_element_by_id(
+            f'{away_team}pitching')
+        away_team_pitching_rows = get_table_rows(
+            away_team_pitching_table, {'cells': 'th, td'})
+        home_team_pitching_table = self.driver.find_element_by_id(
+            f'{home_team}pitching')
+        home_team_pitching_rows = get_table_rows(
+            home_team_pitching_table, {'cells': 'th, td'})
+
+        def get_batter(row):
+            pass
+
+        def get_pitcher(row):
+            pass
+        away_team_batters = [get_batter(row) for row in away_team_batting_rows]
+        home_team_batters = [get_batter(row) for row in home_team_batting_rows]
+        away_team_pitchers = [get_pitcher(row)
+                              for row in away_team_pitching_rows]
+        home_team_pitchers = [get_pitcher(row)
+                              for row in home_team_pitching_rows]
+        return {'away_team_batters': away_team_batters, 'home_team_batters': home_team_batters,
+                'away_team_pitchers': away_team_pitchers, 'home_team_pitchers': home_team_pitchers}
