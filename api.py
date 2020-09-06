@@ -51,7 +51,7 @@ class PlayerResource(Resource):
             return PLAYERS.get(args)
 
         scraper = scraper_factory.get_scraper(args['sport'])
-        teams = scraper.get_teams(args)
+        teams = scraper.get_players(args)
         PLAYERS.set(args, teams)
         return teams
 

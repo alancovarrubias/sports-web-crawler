@@ -15,7 +15,7 @@ class NbaScraper(AbstractScraper):
         self.get(f'leagues/NBA_{season}_standings.html')
         teams_table = self.driver.find_element_by_id(
             'team_vs_team')
-        cell_rows = get_table_rows(teams_table)
+        table_rows = get_table_rows(teams_table)
 
         def get_team(row):
             team = {}
@@ -28,25 +28,24 @@ class NbaScraper(AbstractScraper):
                 team['city'] = ' '.join(text_array[:-1])
             team['abbr'] = self.__get_team_abbr(row[0])
             return team
-        return [get_team(row) for row in cell_rows]
+        return [get_team(row) for row in table_rows]
 
     def get_players(self, args):
         season = args['season']
         team = args['team']
         self.get(f'teams/{team}/{season}.html')
         players_table = self.driver.find_element_by_id(
-            'roster').find_element_by_tag_name('tbody')
-        rows = players_table.find_elements_by_tag_name('tr')
+            'roster')
+        table_rows = get_table_rows(players_table)
 
         def get_player(row):
-            cells = row.find_elements_by_tag_name('td')
             player = {}
-            player['name'] = cells[0].text
-            player['abbr'] = cells[0].get_attribute('data-append-csv')
-            player['position'] = cells[1].text
+            player['name'] = row[0].text
+            player['abbr'] = row[0].get_attribute('data-append-csv')
+            player['position'] = row[1].text
             return player
 
-        return [get_player(row) for row in rows]
+        return [get_player(row) for row in table_rows]
 
     def get_games(self, args):
         season = args['season']
