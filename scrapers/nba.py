@@ -25,7 +25,7 @@ class NbaScraper(AbstractScraper):
     def get_teams(self, args):
         season = args['season']
         self.get(f'leagues/NBA_{season}_standings.html')
-        teams_table = self.driver.find_element_by_id(team_vs_team')
+        teams_table = self.driver.find_element_by_id('team_vs_team')
         table_rows = get_table_rows(teams_table)
 
         def get_team(row):
