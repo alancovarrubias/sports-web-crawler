@@ -39,9 +39,11 @@ class NbaScraper(AbstractScraper):
         table_rows = get_table_rows(players_table)
 
         def get_player(row):
+            anchor = row[0].find_element_by_tag_name('a')
+            link = anchor.get_attribute('href')
             player = {}
-            player['name'] = row[0].text
-            player['abbr'] = row[0].get_attribute('data-append-csv')
+            player['name'] = anchor.text
+            player['abbr'] = re.search("\w*\d{2}", link).group()
             player['position'] = row[1].text
             return player
 
