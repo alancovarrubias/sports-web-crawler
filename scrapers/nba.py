@@ -9,7 +9,8 @@ class NbaScraper(AbstractScraper):
         base_url = 'https://www.basketball-reference.com'
         super().__init__(base_url)
 
-    def get_teams(self, season):
+    def get_teams(self, args):
+        season = args['season']
         self.get(f'leagues/NBA_{season}_standings.html')
         teams_table = self.driver.find_element_by_id(
             'team_vs_team').find_element_by_tag_name('tbody')
@@ -30,7 +31,9 @@ class NbaScraper(AbstractScraper):
             return team
         return [get_team(row) for row in cell_rows]
 
-    def get_players(self, season, team):
+    def get_players(self, args):
+        season = args['season']
+        team = args['team']
         self.get(f'teams/{team}/{season}.html')
         players_table = self.driver.find_element_by_id(
             'roster').find_element_by_tag_name('tbody')
@@ -46,7 +49,8 @@ class NbaScraper(AbstractScraper):
 
         return [get_player(row) for row in rows]
 
-    def get_games(self, season):
+    def get_games(self, args):
+        season = args['season']
         months = (
             {'text': 'October', 'numeric': 10},
             {'text': 'November', 'numeric': 11},
@@ -85,7 +89,10 @@ class NbaScraper(AbstractScraper):
 
         return games
 
-    def get_stats(self, game_url, home_team, away_team):
+    def get_stats(self, args):
+        game_url = args['game_url']
+        home_team = args['home_team']
+        away_team = args['away_team']
         self.get(f'boxscores/{game_url}.html')
 
         def add_advanced_stat(row, stat):

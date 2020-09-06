@@ -1,6 +1,7 @@
 from flask import Flask
 from flask_restful import reqparse, abort, Api, Resource
 from scrapers import ScraperFactory
+from nested_mem_cache import NestedMemCache
 
 app = Flask(__name__)
 api = Api(app)
@@ -12,103 +13,90 @@ def abort_if_keys_dont_exist(args, keys):
     arg_keys = list(args.keys())
     for key in keys:
         if key not in arg_keys:
-            abort(404, message="Missing key %s" % keys)
+            abort(404, message="Required arguments %s" % keys)
 
 
 parser = reqparse.RequestParser()
+parser.add_argument('sport', type=str, location='args')
 parser.add_argument('season', type=int, location='args')
 parser.add_argument('team', type=str, location='args')
 parser.add_argument('game_url', type=str, location='args')
 parser.add_argument('away_team', type=str, location='args')
 parser.add_argument('home_team', type=str, location='args')
 
-# TeamList
-TEAMS = {}
+TEAMS = NestedMemCache(['sport', 'season'])
 
 
-class TeamList(Resource):
+class TeamResource(Resource):
     def get(self):
         args = parser.parse_args()
-        abort_if_keys_dont_exist(args, ['season'])
-        season = args['season']
-        if TEAMS.get(season):
-            return TEAMS[season]
+        abort_if_keys_dont_exist(args, TEAMS.keys)
+        if TEAMS.check(args):
+            return TEAMS.get(args)
 
-        scraper = scraper_factory.get_scraper('NBA')
-        teams = scraper.get_teams(season)
-        TEAMS[season] = teams
+        scraper = scraper_factory.get_scraper(args['sport'])
+        teams = scraper.get_teams(args)
+        TEAMS.set(args, teams)
         return teams
 
-# PlayerList
+
+PLAYERS = NestedMemCache(['sport', 'season', 'team'])
 
 
-PLAYERS = {}
-
-
-class PlayerList(Resource):
+class PlayerResource(Resource):
     def get(self):
         args = parser.parse_args()
-        abort_if_keys_dont_exist(args, ['season', 'team'])
-        season = args['season']
-        team = args['team']
-        if PLAYERS.get(season, {}).get(team):
-            return PLAYERS[season][team]
-        elif not PLAYERS.get(season) == {}:
-            PLAYERS[season] = {}
+        abort_if_keys_dont_exist(args, PLAYERS.keys)
+        if PLAYERS.check(args):
+            return PLAYERS.get(args)
 
-        scraper = scraper_factory.get_scraper('NBA')
-        players = scraper.get_players(season, team)
-        PLAYERS[season][team] = players
-        return players
-
-# GameList
+        scraper = scraper_factory.get_scraper(args['sport'])
+        teams = scraper.get_teams(args)
+        PLAYERS.set(args, teams)
+        return teams
 
 
-GAMES = {}
+GAMES = NestedMemCache(['sport', 'season'])
 
 
-class GameList(Resource):
+class GameResource(Resource):
     def get(self):
         args = parser.parse_args()
-        abort_if_keys_dont_exist(args, ['season'])
-        season = args['season']
+        abort_if_keys_dont_exist(args, GAMES.keys)
 
-        if GAMES.get(season):
-            return GAMES[season]
+        if GAMES.check(args):
+            return GAMES.get(args)
 
-        scraper = scraper_factory.get_scraper('NBA')
-        games = scraper.get_games(season)
-        GAMES[season] = games
+        scraper = scraper_factory.get_scraper(args['sport'])
+        games = scraper.get_games(args)
+        GAMES.set(args, games)
         return games
 
 
-STATS = {}
+STATS = NestedMemCache(['sport', 'game_url', 'home_team', 'away_team'])
 
 
-class StatList(Resource):
+class StatResource(Resource):
     def get(self):
         args = parser.parse_args()
-        abort_if_keys_dont_exist(args, ['game_url', 'home_team', 'away_team'])
-        game_url = args['game_url']
-        home_team = args['home_team']
-        away_team = args['away_team']
+        abort_if_keys_dont_exist(args, GAMES.keys)
 
-        if STATS.get(game_url):
-            return STATS[game_url]
+        if STATS.check(args):
+            return STATS.get(args)
 
-        scraper = scraper_factory.get_scraper('NBA')
-        stats = scraper.get_stats(game_url, home_team, away_team)
-        STATS[game_url] = stats
+        scraper = scraper_factory.get_scraper(args['sport'])
+        stats = scraper.get_stats(args)
+        STATS.set(args, stats)
         return stats
 
 
 ##
 # Actually setup the Api resource routing here
 ##
-api.add_resource(TeamList, '/teams')
-api.add_resource(PlayerList, '/players')
-api.add_resource(GameList, '/games')
-api.add_resource(StatList, '/stats')
+api.add_resource(TeamResource, '/teams')
+api.add_resource(PlayerResource, '/players')
+api.add_resource(GameResource, '/games')
+api.add_resource(StatResource, '/stats')
 
 
 if __name__ == '__main__':

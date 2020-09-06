@@ -19,17 +19,17 @@ class AbstractScraper(ABC):
         self.driver.get(url)
 
     @abstractmethod
-    def get_teams(self):
+    def get_teams(self, args):
         pass
 
     @abstractmethod
-    def get_players(self):
+    def get_players(self, args):
         pass
 
     @abstractmethod
-    def get_games(self):
+    def get_games(self, args):
         pass
 
     @abstractmethod
-    def get_stats(self):
+    def get_stats(self, args):
         pass
