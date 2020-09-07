@@ -18,14 +18,8 @@ MONTHS = (
 
 
 class NbaScraper(AbstractScraper):
-    def __init__(self):
-        base_url = 'https://www.basketball-reference.com'
-        super().__init__(base_url)
-
     def get_teams(self, args):
-        season = args['season']
-        self.get(f'leagues/NBA_{season}_standings.html')
-        teams_table = self.driver.find_element_by_id('team_vs_team')
+        teams_table = self.get('teams', args)
         table_rows = get_table_rows(teams_table)
 
         def get_team(row):
@@ -45,11 +39,7 @@ class NbaScraper(AbstractScraper):
         return {'teams': teams}
 
     def get_players(self, args):
-        season = args['season']
-        team = args['team']
-        self.get(f'teams/{team}/{season}.html')
-        players_table = self.driver.find_element_by_id(
-            'roster')
+        players_table = self.get('players', args)
         table_rows = get_table_rows(players_table)
 
         def get_player(row):
@@ -69,9 +59,8 @@ class NbaScraper(AbstractScraper):
 
         games = []
         for month in MONTHS:
-            lowercased = month['text'].lower()
-            self.get(f'leagues/NBA_{season}_games-{lowercased}.html')
-            games_table = self.driver.find_element_by_id('schedule')
+            args['month'] = month['text'].lower()
+            games_table = self.get('games', args)
             css_config = {'rows': 'tr:not(.thead)', 'cells': 'th, td'}
             table_rows = get_table_rows(games_table, css_config)
 
@@ -92,31 +81,24 @@ class NbaScraper(AbstractScraper):
         return {'games': games}
 
     def get_stats(self, args):
-        game_url = args['game_url']
-        home_team = args['home_team']
-        away_team = args['away_team']
-        self.get(f'boxscores/{game_url}.html')
+        stat_tables = self.get('stats', args)
+        away_tables = stat_tables[:2]
+        home_tables = stat_tables[2:]
 
-        def get_team_table_rows(team, css_config):
-            basic_stats_table = self.driver.find_element_by_id(
-                f'box-{team}-game-basic')
-            basic_rows = get_table_rows(basic_stats_table, css_config)
-            advanced_stats_table = self.driver.find_element_by_id(
-                f'box-{team}-game-advanced')
-            advanced_rows = get_table_rows(
-                advanced_stats_table, css_config)
-            return basic_rows, advanced_rows
-
-        def get_team_stat(team):
+        def get_team_stat(tables):
+            basic_stats_table, advanced_stats_table = tables
             css_config = {'section': 'tfoot', 'cells': 'th, td'}
-            basic_rows, advanced_rows = get_team_table_rows(team, css_config)
+            basic_rows = get_table_rows(basic_stats_table, css_config)
+            advanced_rows = get_table_rows(advanced_stats_table, css_config)
             team_stat = NbaStat('Team')
             team_stat.add_row_data(basic_rows[0], advanced_rows[0])
             return team_stat.toJson()
 
-        def get_player_stats(team):
+        def get_player_stats(tables):
+            basic_stats_table, advanced_stats_table = tables
             css_config = {'rows': 'tr:not(.thead)', 'cells': 'th, td'}
-            basic_rows, advanced_rows = get_team_table_rows(team, css_config)
+            basic_rows = get_table_rows(basic_stats_table, css_config)
+            advanced_rows = get_table_rows(advanced_stats_table, css_config)
             player_stats = []
             for basic_row, advanced_row in zip(basic_rows, advanced_rows):
                 if len(basic_row) <= 2:
@@ -126,8 +108,8 @@ class NbaScraper(AbstractScraper):
                 player_stats.append(player_stat.toJson())
             return player_stats
 
-        away_player_stats = get_player_stats(away_team)
-        home_player_stats = get_player_stats(home_team)
-        away_team_stat = get_team_stat(away_team)
-        home_team_stat = get_team_stat(home_team)
+        away_player_stats = get_player_stats(away_tables)
+        home_player_stats = get_player_stats(home_tables)
+        away_team_stat = get_team_stat(away_tables)
+        home_team_stat = get_team_stat(home_tables)
         return {'away_player_stats': away_player_stats, 'home_player_stats': home_player_stats, 'away_team_stat': away_team_stat, 'home_team_stat': home_team_stat}

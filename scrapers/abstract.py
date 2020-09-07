@@ -1,22 +1,13 @@
 from abc import ABC, abstractmethod
-from selenium import webdriver
-from webdriver_manager.chrome import ChromeDriverManager
-from selenium.webdriver.chrome.options import Options
-import os
+from web_driver import WebDriver
 
 
 class AbstractScraper(ABC):
-    def __init__(self, base_url):
-        self.base_url = base_url
-        chrome_options = Options()
-        chrome_options.add_argument("--headless")
-        options = ChromeDriverManager().install()
-        self.driver = webdriver.Chrome(options, options=chrome_options)
-        super().__init__()
+    def __init__(self):
+        self.web_driver = WebDriver()
 
-    def get(self, endpoint):
-        url = os.path.join(self.base_url, endpoint)
-        self.driver.get(url)
+    def get(self, resource, args):
+        return self.web_driver.get(resource, args)
 
     @abstractmethod
     def get_teams(self, args):

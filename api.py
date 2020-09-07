@@ -10,7 +10,6 @@ scraper_factory = ScraperFactory()
 
 def abort_if_invalid(datastore, args):
     if not datastore.validate_args(args):
-        print("WHOOPs")
         if args['sport'] is None:
             message = "Missing sports argument"
         else:
@@ -84,7 +83,6 @@ class StatResource(Resource):
     def get(self):
         args = parser.parse_args()
         abort_if_invalid(STATS, args)
-        print("HEY")
 
         if STATS.exists(args):
             return STATS.get(args)

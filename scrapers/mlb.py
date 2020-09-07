@@ -2,17 +2,18 @@ from operator import methodcaller
 import re
 from .abstract import AbstractScraper
 from .helpers import get_table_rows, get_team_abbr
+from data_classes.mlb_stat import MlbStat
+
+PITCHING = 'Pitching'
+BATTING = 'Batting'
+PLAYER = 'Player'
+TEAM = 'Team'
 
 
 class MlbScraper(AbstractScraper):
-    def __init__(self):
-        base_url = 'https://www.baseball-reference.com'
-        super().__init__(base_url)
-
     def get_teams(self, args):
-        season = args['season']
-        self.get(f'leagues/MLB/{season}.shtml')
-        teams_table = self.driver.find_element_by_id('teams_standard_batting')
+        teams_table = self.get('teams', args)
+
         table_rows = get_table_rows(teams_table, {'cells': 'th'})[:-1]
 
         def get_team(row):
@@ -32,11 +33,7 @@ class MlbScraper(AbstractScraper):
         return {'teams': teams}
 
     def get_players(self, args):
-        season = args['season']
-        team = args['team']
-
-        self.get(f'teams/{team}/{season}.shtml')
-        players_table = self.driver.find_element_by_id('team_batting')
+        players_table = self.get('players', args)
 
         table_rows = get_table_rows(players_table)
 
@@ -51,13 +48,12 @@ class MlbScraper(AbstractScraper):
         return {'players': players}
 
     def get_games(self, args):
-        season = args['season']
         teams = args['teams'].split(',')
         games = []
         team_links = {}
         for team in teams:
-            self.get(f'teams/{team}/{season}-schedule-scores.shtml')
-            games_table = self.driver.find_element_by_id('team_schedule')
+            args['team'] = team
+            games_table = self.get('games', args)
             rows = get_table_rows(games_table, {'rows': 'tr:not(.thead)'})
             for row in rows:
                 away = row[3].text == '@'
@@ -76,37 +72,50 @@ class MlbScraper(AbstractScraper):
         return {'games': games, 'team_links': team_links}
 
     def get_stats(self, args):
-        game_url = args['game_url']
-        home_team = args['home_team'].replace(" ", "")
-        away_team = args['away_team'].replace(" ", "")
-        self.get(f'boxes/{game_url}.shtml')
-        away_team_batting_table = self.driver.find_element_by_id(
-            f'{away_team}batting')
-        away_team_batting_rows = get_table_rows(
-            away_team_batting_table, {'cells': 'th, td'})
-        home_team_batting_table = self.driver.find_element_by_id(
-            f'{home_team}batting')
-        home_team_batting_rows = get_table_rows(
-            home_team_batting_table, {'cells': 'th, td'})
-        away_team_pitching_table = self.driver.find_element_by_id(
-            f'{away_team}pitching')
-        away_team_pitching_rows = get_table_rows(
-            away_team_pitching_table, {'cells': 'th, td'})
-        home_team_pitching_table = self.driver.find_element_by_id(
-            f'{home_team}pitching')
-        home_team_pitching_rows = get_table_rows(
-            home_team_pitching_table, {'cells': 'th, td'})
+        away_tables, home_tables = self.get('stats', args)
 
-        def get_batter(row):
-            pass
+        def get_team_stat(tables):
+            batting_table, pitching_table = tables
+            css_config = {'section': 'tfoot', 'cells': 'th, td'}
+            batting_rows = get_table_rows(batting_table, css_config)
+            pitching_rows = get_table_rows(pitching_table, css_config)
+            team_pitching_stat = MlbStat(TEAM, PITCHING)
+            team_batting_stat = MlbStat(TEAM, BATTING)
+            team_batting_stat.add_row_data(batting_rows[0])
+            team_pitching_stat.add_row_data(pitching_rows[0])
+            return {BATTING: team_batting_stat.toJson(), PITCHING: team_pitching_stat.toJson()}
 
-        def get_pitcher(row):
-            pass
-        away_team_batters = [get_batter(row) for row in away_team_batting_rows]
-        home_team_batters = [get_batter(row) for row in home_team_batting_rows]
-        away_team_pitchers = [get_pitcher(row)
-                              for row in away_team_pitching_rows]
-        home_team_pitchers = [get_pitcher(row)
-                              for row in home_team_pitching_rows]
-        return {'away_team_batters': away_team_batters, 'home_team_batters': home_team_batters,
-                'away_team_pitchers': away_team_pitchers, 'home_team_pitchers': home_team_pitchers}
+        def get_player_stats(tables):
+            batting_table, pitching_table = tables
+            css_config = {'cells': 'th, td'}
+            batting_rows = get_table_rows(batting_table, css_config)
+            pitching_rows = get_table_rows(pitching_table, css_config)
+            pitching_stats = []
+            for pitching_row in pitching_rows:
+                pitching_stat = MlbStat(PITCHING, PLAYER)
+                pitching_stat.add_row_data(pitching_row)
+                pitching_stats.append(pitching_stat.toJson())
+            batting_stats = []
+            for batting_row in batting_rows:
+                batting_stat = MlbStat(BATTING, PLAYER)
+                batting_stat.add_row_data(batting_row)
+                batting_stats.append(batting_stat.toJson())
+            return batting_stats
+
+        away_player_stats = get_player_stats(away_tables)
+        home_player_stats = get_player_stats(home_tables)
+        away_team_stat = get_team_stat(away_tables)
+        home_team_stat = get_team_stat(home_tables)
+        return {'away_player_stats': away_player_stats, 'home_player_stats': home_player_stats, 'away_team_stat': away_team_stat, 'home_team_stat': home_team_stat}
+
+
+"""
+        def get_team_table_rows(team, css_config):
+            batting_table = self.web_driver.find_element_by_id(
+                f'{team}batting')
+            batting_rows = get_table_rows(batting_table, css_config)
+            pitching_table = self.web_driver.find_element_by_id(
+                f'{team}pitching')
+            pitching_rows = get_table_rows(pitching_table, css_config)
+            return batting_rows, pitching_rows
+            """
