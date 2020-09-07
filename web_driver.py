@@ -6,9 +6,7 @@ from selenium.webdriver.chrome.options import Options
 
 def get_css_selector(resource, args):
     sport = args['sport']
-    team = args['team']
     if sport == 'MLB':
-        base_url = 'https://www.baseball-reference.com'
         if resource == 'teams':
             return '#teams_standard_batting',
         elif resource == 'players':
@@ -16,9 +14,15 @@ def get_css_selector(resource, args):
         elif resource == 'games':
             return '#team_schedule'
         elif resource == 'stats':
-            pass
+            away_team = args['away_team'].replace(' ', '')
+            home_team = args['home_team'].replace(' ', '')
+            return [
+                f'#{away_team}batting',
+                f'#{away_team}pitching',
+                f'#{home_team}batting',
+                f'#{home_team}pitching'
+            ]
     elif sport == 'NBA':
-        base_url = 'https://www.basketball-reference.com'
         if resource == 'teams':
             return '#team_vs_team'
         elif resource == 'players':
@@ -50,7 +54,7 @@ def resource_url(resource, args):
             endpoint = f'teams/{team}/{season}-schedule-scores.shtml'
         elif resource == 'stats':
             game_url = args['game_url']
-            endpoint = f'boxes/{game_url[0:3]}/{game_url}.html'
+            endpoint = f'boxes/{game_url[0:3]}/{game_url}.shtml'
     elif sport == 'NBA':
         base_url = 'https://www.basketball-reference.com'
         if resource == 'teams':
@@ -74,8 +78,6 @@ class WebDriver:
         self.driver = webdriver.Chrome(options, options=chrome_options)
 
     def get(self, resource, args):
-        # home_team = args['home_team'].replace(' ', '')
-        # away_team = args['away_team'].replace(' ', '')
         url = resource_url(resource, args)
         self.driver.get(url)
         tables = self.get_tables(resource, args)

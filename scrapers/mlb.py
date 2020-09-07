@@ -72,15 +72,17 @@ class MlbScraper(AbstractScraper):
         return {'games': games, 'team_links': team_links}
 
     def get_stats(self, args):
-        away_tables, home_tables = self.get('stats', args)
+        tables = self.get('stats', args)
+        away_tables = tables[:2]
+        home_tables = tables[2:]
 
         def get_team_stat(tables):
             batting_table, pitching_table = tables
             css_config = {'section': 'tfoot', 'cells': 'th, td'}
             batting_rows = get_table_rows(batting_table, css_config)
             pitching_rows = get_table_rows(pitching_table, css_config)
-            team_pitching_stat = MlbStat(TEAM, PITCHING)
-            team_batting_stat = MlbStat(TEAM, BATTING)
+            team_pitching_stat = MlbStat(PITCHING, TEAM)
+            team_batting_stat = MlbStat(BATTING, TEAM)
             team_batting_stat.add_row_data(batting_rows[0])
             team_pitching_stat.add_row_data(pitching_rows[0])
             return {BATTING: team_batting_stat.toJson(), PITCHING: team_pitching_stat.toJson()}
@@ -107,15 +109,3 @@ class MlbScraper(AbstractScraper):
         away_team_stat = get_team_stat(away_tables)
         home_team_stat = get_team_stat(home_tables)
         return {'away_player_stats': away_player_stats, 'home_player_stats': home_player_stats, 'away_team_stat': away_team_stat, 'home_team_stat': home_team_stat}
-
-
-"""
-        def get_team_table_rows(team, css_config):
-            batting_table = self.web_driver.find_element_by_id(
-                f'{team}batting')
-            batting_rows = get_table_rows(batting_table, css_config)
-            pitching_table = self.web_driver.find_element_by_id(
-                f'{team}pitching')
-            pitching_rows = get_table_rows(pitching_table, css_config)
-            return batting_rows, pitching_rows
-            """

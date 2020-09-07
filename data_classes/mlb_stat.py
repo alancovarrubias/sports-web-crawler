@@ -1,9 +1,25 @@
 import json
+import re
 
 PITCHING = 'Pitching'
 BATTING = 'Batting'
 PLAYER = 'Player'
 TEAM = 'Team'
+
+
+def convert_numeric(text):
+    if len(text) == 0:
+        return 0
+    elif "." in text:
+        return float(text)
+    else:
+        return int(text)
+
+
+def get_abbr(cell):
+    anchor = cell.find_element_by_tag_name('a')
+    abbr = re.search(r"[a-z]*\d{2}", anchor.get_attribute('href')).group()
+    return abbr
 
 
 class MlbStat:
@@ -20,25 +36,32 @@ class MlbStat:
 
     def add_batting_stat(self, batting_row):
         text_data = [cell.text for cell in batting_row]
-        self.stat['fg'] = int(text_data[2])
-        self.stat['fga'] = int(text_data[3])
+        if self.model == PLAYER:
+            self.stat['abbr'] = get_abbr(batting_row[0])
+        self.stat['ab'] = convert_numeric(text_data[1])
+        self.stat['r'] = convert_numeric(text_data[2])
+        self.stat['h'] = convert_numeric(text_data[3])
+        self.stat['rbi'] = convert_numeric(text_data[4])
+        self.stat['bb'] = convert_numeric(text_data[5])
+        self.stat['so'] = convert_numeric(text_data[6])
+        self.stat['pa'] = convert_numeric(text_data[7])
+        self.stat['ba'] = convert_numeric(text_data[8])
+        self.stat['obp'] = convert_numeric(text_data[9])
+        self.stat['slg'] = convert_numeric(text_data[10])
+        self.stat['ops'] = convert_numeric(text_data[11])
 
     def add_pitching_stat(self, pitching_row):
         text_data = [cell.text for cell in pitching_row]
-        self.stat['fg'] = int(text_data[2])
-        self.stat['fga'] = int(text_data[3])
-        self.stat['fg3'] = int(text_data[5])
-        self.stat['fg3a'] = int(text_data[6])
-        self.stat['ft'] = int(text_data[8])
-        self.stat['fta'] = int(text_data[9])
-        self.stat['orb'] = int(text_data[11])
-        self.stat['drb'] = int(text_data[12])
-        self.stat['ast'] = int(text_data[14])
-        self.stat['stl'] = int(text_data[15])
-        self.stat['blk'] = int(text_data[16])
-        self.stat['tov'] = int(text_data[17])
-        self.stat['pf'] = int(text_data[18])
-        self.stat['pts'] = int(text_data[19])
+        if self.model == PLAYER:
+            self.stat['abbr'] = get_abbr(pitching_row[0])
+        self.stat['ip'] = convert_numeric(text_data[1])
+        self.stat['h'] = convert_numeric(text_data[2])
+        self.stat['r'] = convert_numeric(text_data[3])
+        self.stat['er'] = convert_numeric(text_data[4])
+        self.stat['bb'] = convert_numeric(text_data[5])
+        self.stat['so'] = convert_numeric(text_data[6])
+        self.stat['hr'] = convert_numeric(text_data[7])
+        self.stat['era'] = convert_numeric(text_data[8])
 
     def toJson(self):
         return self.stat
