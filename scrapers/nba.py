@@ -55,8 +55,6 @@ class NbaScraper(AbstractScraper):
         return {'players': players}
 
     def get_games(self, args):
-        season = args['season']
-
         games = []
         for month in MONTHS:
             args['month'] = month['text'].lower()
