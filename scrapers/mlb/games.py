@@ -6,13 +6,14 @@ from operator import methodcaller
 
 class MlbGamesScraper(AbstractScraper):
     def get_resource(self):
-        args = {}
-        teams = args['teams'].split(',')
         games = []
         team_links = {}
+        season = self.args['season']
+        teams = self.args['teams'].split(',')
         for team in teams:
-            args['team'] = team
-            games_table = self.get('games', args)
+            endpoint = f'teams/{team}/{season}-schedule-scores.shtml'
+            css_selectors = ('#team_schedule',)
+            games_table = self.get_tables(endpoint, css_selectors)[0]
             rows = get_table_rows(games_table, {'rows': 'tr:not(.thead)'})
             for row in rows:
                 away = row[3].text == '@'

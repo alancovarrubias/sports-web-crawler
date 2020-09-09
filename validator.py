@@ -1,4 +1,4 @@
-from constant import SPORTS
+from constants.sports import SPORTS
 from key_store import KeyStore
 
 

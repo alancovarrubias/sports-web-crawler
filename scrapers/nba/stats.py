@@ -6,8 +6,17 @@ from data_classes.nba_stat import NbaStat
 
 class NbaStatsScraper(AbstractScraper):
     def get_resource(self):
-        args = []
-        stat_tables = self.get('stats', args)
+        away_team = self.args['away_team']
+        home_team = self.args['home_team']
+        game_url = self.args['game_url']
+        endpoint = f'boxscores/{game_url}.html'
+        css_selectors = (
+            f'#box-{away_team}-game-basic',
+            f'#box-{away_team}-game-advanced',
+            f'#box-{home_team}-game-basic',
+            f'#box-{home_team}-game-advanced'
+        )
+        stat_tables = self.get_tables(endpoint, css_selectors)
         away_tables = stat_tables[:2]
         home_tables = stat_tables[2:]
 

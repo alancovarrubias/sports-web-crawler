@@ -1,13 +1,26 @@
+from os import path
+from constants.sports import NBA, MLB
+from constants.mlb import BASEBALL_REFERENCE
+from constants.nba import BASKETBALL_REFERENCE
 from abc import ABC, abstractmethod
-from web_driver import WebDriver
+from scrapers.web_driver import WebDriver
+
+def get_base_url(sport):
+    if sport == NBA:
+        return BASKETBALL_REFERENCE
+    elif sport == MLB:
+        return BASEBALL_REFERENCE
 
 
 class AbstractScraper(ABC):
     def __init__(self, resource_type, args):
-        self.web_driver = WebDriver(resource_type, args)
+        self.args = args
+        self.web_driver = WebDriver()
+        self.base_url = get_base_url(args['sport'])
 
-    def get(self, resource, args):
-        return self.web_driver.get()
+    def get_tables(self, resource_endpoint, css_selectors):
+        resource_url = path.join(self.base_url, resource_endpoint)
+        return self.web_driver.get_table_elements(resource_url, css_selectors)
 
     @abstractmethod
     def get_resource(self):

@@ -5,8 +5,11 @@ from scrapers.helpers import get_table_rows, get_team_abbr
 
 class MlbPlayersScraper(AbstractScraper):
     def get_resource(self):
-        args = []
-        players_table = self.get('players', args)
+        season = self.args['season']
+        team = self.args['team']
+        endpoint = f'teams/{team}/{season}.html'
+        css_selectors = ('#team_batting',)
+        players_table = self.get_tables(endpoint, css_selectors)[0]
 
         table_rows = get_table_rows(players_table)
 

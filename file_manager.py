@@ -2,11 +2,15 @@ from key_store import KeyStore
 import os
 import json
 
+DB_FOLDER = 'db'
+
 def get_file_path(resource_type, args):
     key_store = KeyStore(resource_type, args)
-    os.makedirs(resource_type, exist_ok=True)
+    os.makedirs(DB_FOLDER, exist_ok=True)
+    resource_folder = os.path.join(DB_FOLDER, resource_type)
+    os.makedirs(resource_folder, exist_ok=True)
     file_name = ''.join(map(str, key_store.arg_values))
-    return os.path.join(resource_type, file_name)
+    return os.path.join(resource_folder, file_name)
 
 class FileManager:
     def __init__(self, resource_type, key_store):

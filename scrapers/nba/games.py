@@ -1,5 +1,5 @@
-from constant import NBA_MONTHS
 import re
+from constants.nba import MONTHS
 from scrapers.abstract import AbstractScraper
 from scrapers.helpers import get_table_rows, get_team_abbr
 from operator import methodcaller
@@ -8,10 +8,12 @@ from operator import methodcaller
 class NbaGamesScraper(AbstractScraper):
     def get_resource(self):
         games = []
-        args = {}
-        for month in NBA_MONTHS:
-            args['month'] = month['text'].lower()
-            games_table = self.get('games', args)
+        for month in MONTHS:
+            season = self.args['season']
+            month_text = month['text']
+            endpoint = f'leagues/NBA_{season}_games-{month_text}.html'
+            css_selectors = ('#schedule',)
+            games_table = self.get_tables(endpoint, css_selectors)[0]
             css_config = {'rows': 'tr:not(.thead)', 'cells': 'th, td'}
             table_rows = get_table_rows(games_table, css_config)
 

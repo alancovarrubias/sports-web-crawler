@@ -1,12 +1,15 @@
 import re
-from scrapers.abstract import AbstractScraper
 from scrapers.helpers import get_table_rows, get_team_abbr
+from scrapers.abstract import AbstractScraper
 
 
 class NbaPlayersScraper(AbstractScraper):
     def get_resource(self):
-        args = []
-        players_table = self.get('players', args)
+        season = self.args['season']
+        team = self.args['team']
+        endpoint = f'teams/{team}/{season}.html'
+        css_selectors = ('#roster',)
+        players_table = self.get_tables(endpoint, css_selectors)[0]
         table_rows = get_table_rows(players_table)
 
         def get_player(row):

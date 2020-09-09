@@ -1,16 +1,26 @@
 import re
 from scrapers.abstract import AbstractScraper
 from scrapers.helpers import get_table_rows, get_team_abbr
-from constant import PITCHING, BATTING, TEAM, PLAYER
+from constants.mlb import PITCHING, BATTING
+from constants.models import TEAM, PLAYER
 from data_classes.mlb_stat import MlbStat
 
 
 class MlbStatsScraper(AbstractScraper):
     def get_resource(self):
-        args = []
-        tables = self.get('stats', args)
-        away_tables = tables[:2]
-        home_tables = tables[2:]
+        game_url = self.args['game_url']
+        away_team = self.args['away_team'].replace(' ', '')
+        home_team = self.args['home_team'].replace(' ', '')
+        endpoint = f'boxes/{game_url[0:3]}/{game_url}.shtml'
+        css_selectors = (
+            f'#{away_team}batting',
+            f'#{away_team}pitching',
+            f'#{home_team}batting',
+            f'#{home_team}pitching'
+        )
+        stats_tables = self.get_tables(endpoint, css_selectors)
+        away_tables = stats_tables[:2]
+        home_tables = stats_tables[2:]
 
         def get_team_stat(tables):
             batting_table, pitching_table = tables

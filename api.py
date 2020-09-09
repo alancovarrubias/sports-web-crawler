@@ -1,15 +1,14 @@
 from flask import Flask
 from flask_restful import reqparse, abort, Api, Resource
+from constants.models import TEAM, PLAYER, GAME, STAT
 from resources import Resources
-from validator import Validator
-from constant import TEAM, PLAYER, GAME, STAT
 
 app = Flask(__name__)
 api = Api(app)
 
-def abort_if_invalid(resources):
-    if not resources.valid:
-        abort(404, message=resources.error_message)
+def abort_if_invalid(validator):
+    if not validator.valid:
+        abort(404, message=validator.error_message)
         
 parser = reqparse.RequestParser()
 parser.add_argument('sport', type=str, location='args')
@@ -23,8 +22,8 @@ parser.add_argument('home_team', type=str, location='args')
 def get_resource(resource_type):
     args = parser.parse_args()
     resources = Resources(resource_type, args)
-    abort_if_invalid(resources)
-    return resources.get()
+    abort_if_invalid(resources.validator)
+    return resources.fetch()
 
 class TeamResources(Resource):
     def get(self):
