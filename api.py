@@ -1,22 +1,16 @@
 from flask import Flask
 from flask_restful import reqparse, abort, Api, Resource
-from scrapers import ScraperFactory
-from datastore import Datastore
+from resources import Resources
+from validator import Validator
+from constant import TEAM, PLAYER, GAME, STAT
 
 app = Flask(__name__)
 api = Api(app)
-scraper_factory = ScraperFactory()
 
-
-def abort_if_invalid(datastore, args):
-    if not datastore.validate_args(args):
-        if args['sport'] is None:
-            message = "Missing sports argument"
-        else:
-            message = "Required arguments %s" % datastore.required_keys(args)
-        abort(404, message=message)
-
-
+def abort_if_invalid(resources):
+    if not resources.valid:
+        abort(404, message=resources.error_message)
+        
 parser = reqparse.RequestParser()
 parser.add_argument('sport', type=str, location='args')
 parser.add_argument('season', type=int, location='args')
@@ -26,77 +20,32 @@ parser.add_argument('game_url', type=str, location='args')
 parser.add_argument('away_team', type=str, location='args')
 parser.add_argument('home_team', type=str, location='args')
 
-TEAMS = Datastore('Team')
+def get_resource(resource_type):
+    args = parser.parse_args()
+    resources = Resources(resource_type, args)
+    abort_if_invalid(resources)
+    return resources.get()
 
-
-class TeamResource(Resource):
+class TeamResources(Resource):
     def get(self):
-        args = parser.parse_args()
-        abort_if_invalid(TEAMS, args)
-        if TEAMS.exists(args):
-            return TEAMS.get(args)
+        return get_resource(TEAM)
 
-        scraper = scraper_factory.get_scraper(args)
-        teams_data = scraper.get_teams(args)
-        TEAMS.set(args, teams_data)
-        return teams_data
-
-
-PLAYERS = Datastore('Player')
-
-
-class PlayerResource(Resource):
+class PlayerResources(Resource):
     def get(self):
-        args = parser.parse_args()
-        abort_if_invalid(PLAYERS, args)
-        if PLAYERS.exists(args):
-            return PLAYERS.get(args)
+        return get_resource(PLAYER)
 
-        scraper = scraper_factory.get_scraper(args)
-        players_data = scraper.get_players(args)
-        PLAYERS.set(args, players_data)
-        return players_data
-
-
-GAME_KEYS = ['sport', 'season']
-GAMES = Datastore('Game')
-
-
-class GameResource(Resource):
+class GameResources(Resource):
     def get(self):
-        args = parser.parse_args()
-        abort_if_invalid(GAMES, args)
+        return get_resource(GAME)
 
-        if GAMES.exists(args):
-            return GAMES.get(args)
-
-        scraper = scraper_factory.get_scraper(args)
-        games_data = scraper.get_games(args)
-        GAMES.set(args, games_data)
-        return games_data
-
-
-STATS = Datastore('Stat')
-
-
-class StatResource(Resource):
+class StatResources(Resource):
     def get(self):
-        args = parser.parse_args()
-        abort_if_invalid(STATS, args)
+        return get_resource(STAT)
 
-        if STATS.exists(args):
-            return STATS.get(args)
-
-        scraper = scraper_factory.get_scraper(args)
-        stats_data = scraper.get_stats(args)
-        STATS.set(args, stats_data)
-        return stats_data
-
-
-api.add_resource(TeamResource, '/teams')
-api.add_resource(PlayerResource, '/players')
-api.add_resource(GameResource, '/games')
-api.add_resource(StatResource, '/stats')
+api.add_resource(TeamResources, '/teams')
+api.add_resource(PlayerResources, '/players')
+api.add_resource(GameResources, '/games')
+api.add_resource(StatResources, '/stats')
 
 
 if __name__ == '__main__':

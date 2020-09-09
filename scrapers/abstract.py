@@ -10,6 +10,10 @@ class AbstractScraper(ABC):
         return self.web_driver.get(resource, args)
 
     @abstractmethod
+    def get_table_data(self):
+        pass
+
+    @abstractmethod
     def get_teams(self, args):
         pass
 
