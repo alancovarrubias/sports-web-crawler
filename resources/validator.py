@@ -1,6 +1,4 @@
 from constants.sports import SPORTS
-from key_store import KeyStore
-
 
 class Validator:
     def __init__(self, key_store):
