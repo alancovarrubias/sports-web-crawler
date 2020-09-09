@@ -6,12 +6,13 @@ from .stats import MlbStatsScraper
 
 
 class MlbScraperFactory:
-    def get_scraper(self, resource_type, args):
+    def get_scraper(self, key_store):
+        resource_type = key_store.resource_type
         if resource_type == TEAM:
-            return MlbTeamsScraper(resource_type, args)
+            return MlbTeamsScraper(key_store)
         if resource_type == PLAYER:
-            return MlbPlayersScraper(resource_type, args)
+            return MlbPlayersScraper(key_store)
         if resource_type == GAME:
-            return MlbGamesScraper(resource_type, args)
+            return MlbGamesScraper(key_store)
         if resource_type == STAT:
-            return MlbStatsScraper(resource_type, args)
+            return MlbStatsScraper(key_store)

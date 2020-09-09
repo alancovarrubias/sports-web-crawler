@@ -8,8 +8,8 @@ class MlbGamesScraper(AbstractScraper):
     def get_resource(self):
         games = []
         team_links = {}
-        season = self.args['season']
-        teams = self.args['teams'].split(',')
+        season = self.key_store.args['season']
+        teams = self.key_store.args['teams'].split(',')
         for team in teams:
             endpoint = f'teams/{team}/{season}-schedule-scores.shtml'
             css_selectors = ('#team_schedule',)

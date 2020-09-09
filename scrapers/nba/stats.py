@@ -6,9 +6,9 @@ from resources.nba_stat import NbaStat
 
 class NbaStatsScraper(AbstractScraper):
     def get_resource(self):
-        away_team = self.args['away_team']
-        home_team = self.args['home_team']
-        game_url = self.args['game_url']
+        away_team = self.key_store.args['away_team']
+        home_team = self.key_store.args['home_team']
+        game_url = self.key_store.args['game_url']
         endpoint = f'boxscores/{game_url}.html'
         css_selectors = (
             f'#box-{away_team}-game-basic',

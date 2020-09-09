@@ -6,12 +6,13 @@ from .stats import NbaStatsScraper
 
 
 class NbaScraperFactory:
-    def get_scraper(self, resource_type, args):
+    def get_scraper(self, key_store):
+        resource_type = key_store.resource_type
         if resource_type == TEAM:
-            return NbaTeamsScraper(resource_type, args)
+            return NbaTeamsScraper(key_store)
         if resource_type == PLAYER:
-            return NbaPlayersScraper(resource_type, args)
+            return NbaPlayersScraper(key_store)
         if resource_type == GAME:
-            return NbaGamesScraper(resource_type, args)
+            return NbaGamesScraper(key_store)
         if resource_type == STAT:
-            return NbaStatsScraper(resource_type, args)
+            return NbaStatsScraper(key_store)

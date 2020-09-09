@@ -8,9 +8,9 @@ from resources.mlb_stat import MlbStat
 
 class MlbStatsScraper(AbstractScraper):
     def get_resource(self):
-        game_url = self.args['game_url']
-        away_team = self.args['away_team'].replace(' ', '')
-        home_team = self.args['home_team'].replace(' ', '')
+        game_url = self.key_store.args['game_url']
+        away_team = self.key_store.args['away_team'].replace(' ', '')
+        home_team = self.key_store.args['home_team'].replace(' ', '')
         endpoint = f'boxes/{game_url[0:3]}/{game_url}.shtml'
         css_selectors = (
             f'#{away_team}batting',

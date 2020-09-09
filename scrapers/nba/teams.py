@@ -5,7 +5,7 @@ from scrapers.helpers import get_table_rows, get_team_abbr
 
 class NbaTeamsScraper(AbstractScraper):
     def get_resource(self):
-        season = self.args['season']
+        season = self.key_store.args['season']
         endpoint = f'leagues/NBA_{season}_standings.html'
         css_selectors = ('#team_vs_team',)
         teams_table = self.get_tables(endpoint, css_selectors)[0]

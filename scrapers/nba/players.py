@@ -5,8 +5,8 @@ from scrapers.abstract import AbstractScraper
 
 class NbaPlayersScraper(AbstractScraper):
     def get_resource(self):
-        season = self.args['season']
-        team = self.args['team']
+        season = self.key_store.args['season']
+        team = self.key_store.args['team']
         endpoint = f'teams/{team}/{season}.html'
         css_selectors = ('#roster',)
         players_table = self.get_tables(endpoint, css_selectors)[0]

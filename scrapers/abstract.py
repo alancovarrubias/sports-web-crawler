@@ -13,10 +13,10 @@ def get_base_url(sport):
 
 
 class AbstractScraper(ABC):
-    def __init__(self, resource_type, args):
-        self.args = args
+    def __init__(self, key_store):
         self.web_driver = WebDriver()
-        self.base_url = get_base_url(args['sport'])
+        self.base_url = get_base_url(key_store.sport)
+        self.key_store = key_store
 
     def get_tables(self, resource_endpoint, css_selectors):
         resource_url = path.join(self.base_url, resource_endpoint)

@@ -4,10 +4,10 @@ from scrapers.mlb import MlbScraperFactory
 
 
 class ScraperFactory:
-    def get_scraper(self, resource_type, args):
-        sport = args['sport']
+    def get_scraper(self, key_store):
+        sport = key_store.sport
         if sport == NBA:
-            return NbaScraperFactory().get_scraper(resource_type, args)
+            return NbaScraperFactory().get_scraper(key_store)
         elif sport == MLB:
-            return MlbScraperFactory().get_scraper(resource_type, args)
+            return MlbScraperFactory().get_scraper(key_store)
     

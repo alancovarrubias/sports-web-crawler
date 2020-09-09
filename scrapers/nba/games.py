@@ -9,7 +9,7 @@ class NbaGamesScraper(AbstractScraper):
     def get_resource(self):
         games = []
         for month in MONTHS:
-            season = self.args['season']
+            season = self.key_store.args['season']
             month_text = month['text']
             endpoint = f'leagues/NBA_{season}_games-{month_text}.html'
             css_selectors = ('#schedule',)

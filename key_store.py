@@ -19,9 +19,8 @@ KEYS = {
 
 class KeyStore:
     def __init__(self, resource_type, args):
-        sport = args['sport']
-        self.required_keys = KEYS[sport][resource_type]
-        arg_items = {k: v for k, v in args.items() if v is not None}
-        self.arg_keys = list(arg_items.keys())
-        self.arg_values = list(arg_items.values())
+        self.resource_type = resource_type
+        self.sport = args['sport']
+        self.required_keys = KEYS[self.sport][self.resource_type]
+        self.args = {k: v for k, v in args.items() if v is not None}
 
