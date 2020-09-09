@@ -1,7 +1,7 @@
 import re
 from scrapers.abstract import AbstractScraper
 from scrapers.helpers import get_table_rows, get_team_abbr
-from data_classes.nba_stat import NbaStat
+from resources.nba_stat import NbaStat
 
 
 class NbaStatsScraper(AbstractScraper):

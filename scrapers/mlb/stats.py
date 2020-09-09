@@ -3,7 +3,7 @@ from scrapers.abstract import AbstractScraper
 from scrapers.helpers import get_table_rows, get_team_abbr
 from constants.mlb import PITCHING, BATTING
 from constants.models import TEAM, PLAYER
-from data_classes.mlb_stat import MlbStat
+from resources.mlb_stat import MlbStat
 
 
 class MlbStatsScraper(AbstractScraper):
