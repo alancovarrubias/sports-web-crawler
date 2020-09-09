@@ -10,17 +10,5 @@ class AbstractScraper(ABC):
         return self.web_driver.get()
 
     @abstractmethod
-    def get_teams(self, args):
-        pass
-
-    @abstractmethod
-    def get_players(self, args):
-        pass
-
-    @abstractmethod
-    def get_games(self, args):
-        pass
-
-    @abstractmethod
-    def get_stats(self, args):
+    def get_resource(self):
         pass
