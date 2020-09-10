@@ -1,6 +1,6 @@
 from const.sports import NBA, MLB
-from scrapers.nba import NbaScraperFactory
-from scrapers.mlb import MlbScraperFactory
+from crawlers.nba import NbaScraperFactory
+from crawlers.mlb import MlbScraperFactory
 
 
 class ScraperFactory:

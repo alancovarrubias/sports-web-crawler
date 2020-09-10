@@ -1,8 +1,8 @@
 import re
 from const.mlb import PITCHING, BATTING
 from const.models import TEAM, PLAYER
-from scrapers.abstract import AbstractScraper
-from scrapers.helpers import get_table_rows
+from crawlers.abstract import AbstractScraper
+from crawlers.helpers import get_table_rows
 from models.mlb.stat import MlbStat
 
 

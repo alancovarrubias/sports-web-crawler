@@ -1,7 +1,7 @@
 from resources.file_manager import FileManager
 from resources.validator import Validator
 from resources.key_store import KeyStore
-from scrapers import ScraperFactory
+from crawlers import ScraperFactory
 
 class Resources:
     def __init__(self, resource_type, args):

@@ -1,7 +1,7 @@
 import re
-from scrapers.abstract import AbstractScraper
+from crawlers.abstract import AbstractScraper
 from models.nba.team import NbaTeam
-from scrapers.helpers import get_table_rows
+from crawlers.helpers import get_table_rows
 
 
 class NbaTeamsScraper(AbstractScraper):

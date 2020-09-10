@@ -3,7 +3,7 @@ from const.sports import NBA, MLB
 from const.mlb import BASEBALL_REFERENCE
 from const.nba import BASKETBALL_REFERENCE
 from abc import ABC, abstractmethod
-from scrapers.web_driver import WebDriver
+from crawlers.web_driver import WebDriver
 
 def get_base_url(sport):
     if sport == NBA:
