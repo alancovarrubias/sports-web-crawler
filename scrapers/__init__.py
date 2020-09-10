@@ -1,4 +1,4 @@
-from constants.sports import NBA, MLB
+from const.sports import NBA, MLB
 from scrapers.nba import NbaScraperFactory
 from scrapers.mlb import MlbScraperFactory
 

@@ -1,7 +1,7 @@
 from os import path
-from constants.sports import NBA, MLB
-from constants.mlb import BASEBALL_REFERENCE
-from constants.nba import BASKETBALL_REFERENCE
+from const.sports import NBA, MLB
+from const.mlb import BASEBALL_REFERENCE
+from const.nba import BASKETBALL_REFERENCE
 from abc import ABC, abstractmethod
 from scrapers.web_driver import WebDriver
 

@@ -1,6 +1,6 @@
 from flask import Flask
 from flask_restful import reqparse, abort, Api, Resource
-from constants.models import TEAM, PLAYER, GAME, STAT
+from const.models import TEAM, PLAYER, GAME, STAT
 from resources import Resources
 
 app = Flask(__name__)

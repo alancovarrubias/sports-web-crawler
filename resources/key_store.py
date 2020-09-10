@@ -1,5 +1,5 @@
-from constants.sports import NBA, MLB, SPORTS
-from constants.models import TEAM, PLAYER, GAME, STAT
+from const.sports import NBA, MLB, SPORTS
+from const.models import TEAM, PLAYER, GAME, STAT
 
 KEYS = {
     NBA: {

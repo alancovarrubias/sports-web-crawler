@@ -1,7 +1,7 @@
 import re
 from scrapers.abstract import AbstractScraper
 from scrapers.helpers import get_table_rows, get_team_abbr
-from models.nba_stat import NbaStat
+from models.nba.stat import NbaStat
 
 
 class NbaStatsScraper(AbstractScraper):
@@ -23,10 +23,9 @@ class NbaStatsScraper(AbstractScraper):
         def get_team_stat(tables):
             basic_stats_table, advanced_stats_table = tables
             css_config = {'section': 'tfoot', 'cells': 'th, td'}
-            basic_rows = get_table_rows(basic_stats_table, css_config)
-            advanced_rows = get_table_rows(advanced_stats_table, css_config)
-            team_stat = NbaStat('Team')
-            team_stat.add_row_data(basic_rows[0], advanced_rows[0])
+            basic_row = get_table_rows(basic_stats_table, css_config)[0]
+            advanced_row = get_table_rows(advanced_stats_table, css_config)[0]
+            team_stat = NbaStat('Team', basic_row, advanced_row)
             return team_stat.toJson()
 
         def get_player_stats(tables):
@@ -38,8 +37,7 @@ class NbaStatsScraper(AbstractScraper):
             for basic_row, advanced_row in zip(basic_rows, advanced_rows):
                 if len(basic_row) <= 2:
                     continue
-                player_stat = NbaStat('Player')
-                player_stat.add_row_data(basic_row, advanced_row)
+                player_stat = NbaStat('Player', basic_row, advanced_row)
                 player_stats.append(player_stat.toJson())
             return player_stats
 

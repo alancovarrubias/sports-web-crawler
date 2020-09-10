@@ -1,4 +1,4 @@
-from constants.models import TEAM, PLAYER, GAME, STAT
+from const.models import TEAM, PLAYER, GAME, STAT
 from .teams import MlbTeamsScraper
 from .players import MlbPlayersScraper
 from .games import MlbGamesScraper

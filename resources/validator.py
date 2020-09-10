@@ -1,4 +1,4 @@
-from constants.sports import SPORTS
+from const.sports import SPORTS
 
 class Validator:
     def __init__(self, key_store):
