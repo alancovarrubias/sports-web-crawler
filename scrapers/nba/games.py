@@ -25,7 +25,6 @@ class NbaGamesScraper(AbstractScraper):
             games_table = self.get_tables(endpoint, css_selectors)[0]
             css_config = {'rows': 'tr:not(.thead)', 'cells': 'th, td'}
             table_rows = get_table_rows(games_table, css_config)
-            month_games = list(map(NbaGame, table_rows))
-            games += month_games
+            games += list(map(lambda row: NbaGame(row).toJson(), table_rows))
 
         return {'games': games}

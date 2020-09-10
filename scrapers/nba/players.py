@@ -12,5 +12,5 @@ class NbaPlayersScraper(AbstractScraper):
         css_selectors = ('#roster',)
         players_table = self.get_tables(endpoint, css_selectors)[0]
         table_rows = get_table_rows(players_table)
-        players = list(map(NbaPlayer, table_rows))
+        players = list(map(lambda row: NbaPlayer(row).toJson(), table_rows))
         return {'players': players}

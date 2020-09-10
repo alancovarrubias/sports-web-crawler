@@ -39,7 +39,7 @@ class MlbStatsScraper(AbstractScraper):
             pitching_stats = []
             for pitching_row in pitching_rows:
                 pitching_stat = MlbStat(PITCHING, PLAYER, pitching_row)
-                pitching_stats.append(pitching_stat.toJson())
+                pitching_stats.append(pitching_stat)
             batting_stats = []
             for batting_row in batting_rows:
                 batting_stat = MlbStat(BATTING, PLAYER, batting_row)

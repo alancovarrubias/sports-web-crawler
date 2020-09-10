@@ -6,10 +6,9 @@ from scrapers import ScraperFactory
 class Resources:
     def __init__(self, resource_type, args):
         key_store = KeyStore(resource_type, args)
-        validator = Validator(key_store)
+        self.validator = Validator(key_store)
         self.file_manager = FileManager(key_store)
         self.scraper = ScraperFactory().get_scraper(key_store)
-        self.valid = validator.validate_args()
 
     def fetch(self):
         file_exists = self.file_manager.file_exists()

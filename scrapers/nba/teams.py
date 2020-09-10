@@ -11,5 +11,5 @@ class NbaTeamsScraper(AbstractScraper):
         css_selectors = ('#team_vs_team',)
         teams_table = self.get_tables(endpoint, css_selectors)[0]
         table_rows = get_table_rows(teams_table)
-        teams = list(map(NbaTeam, table_rows))
+        teams = list(map(lambda row: NbaTeam(row).toJson(), table_rows))
         return {'teams': teams}
