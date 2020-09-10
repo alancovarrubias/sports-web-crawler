@@ -2,7 +2,7 @@ import re
 from const.mlb import PITCHING, BATTING
 from const.models import TEAM, PLAYER
 from scrapers.abstract import AbstractScraper
-from scrapers.helpers import get_table_rows, get_team_abbr
+from scrapers.helpers import get_table_rows
 from models.mlb.stat import MlbStat
 
 
@@ -25,12 +25,10 @@ class MlbStatsScraper(AbstractScraper):
         def get_team_stat(tables):
             batting_table, pitching_table = tables
             css_config = {'section': 'tfoot', 'cells': 'th, td'}
-            batting_rows = get_table_rows(batting_table, css_config)
-            pitching_rows = get_table_rows(pitching_table, css_config)
-            team_pitching_stat = MlbStat(PITCHING, TEAM)
-            team_batting_stat = MlbStat(BATTING, TEAM)
-            team_batting_stat.add_row_data(batting_rows[0])
-            team_pitching_stat.add_row_data(pitching_rows[0])
+            pitching_row = get_table_rows(pitching_table, css_config)[0]
+            batting_row = get_table_rows(batting_table, css_config)[0]
+            team_pitching_stat = MlbStat(PITCHING, TEAM, pitching_row)
+            team_batting_stat = MlbStat(BATTING, TEAM, batting_row)
             return {BATTING: team_batting_stat.toJson(), PITCHING: team_pitching_stat.toJson()}
 
         def get_player_stats(tables):
@@ -40,13 +38,11 @@ class MlbStatsScraper(AbstractScraper):
             pitching_rows = get_table_rows(pitching_table, css_config)
             pitching_stats = []
             for pitching_row in pitching_rows:
-                pitching_stat = MlbStat(PITCHING, PLAYER)
-                pitching_stat.add_row_data(pitching_row)
+                pitching_stat = MlbStat(PITCHING, PLAYER, pitching_row)
                 pitching_stats.append(pitching_stat.toJson())
             batting_stats = []
             for batting_row in batting_rows:
-                batting_stat = MlbStat(BATTING, PLAYER)
-                batting_stat.add_row_data(batting_row)
+                batting_stat = MlbStat(BATTING, PLAYER, batting_row)
                 batting_stats.append(batting_stat.toJson())
             return batting_stats
 

@@ -1,6 +1,7 @@
 import re
-from scrapers.helpers import get_table_rows, get_team_abbr
+from scrapers.helpers import get_table_rows
 from scrapers.abstract import AbstractScraper
+from models.nba.player import NbaPlayer
 
 
 class NbaPlayersScraper(AbstractScraper):
@@ -11,15 +12,5 @@ class NbaPlayersScraper(AbstractScraper):
         css_selectors = ('#roster',)
         players_table = self.get_tables(endpoint, css_selectors)[0]
         table_rows = get_table_rows(players_table)
-
-        def get_player(row):
-            anchor = row[0].find_element_by_tag_name('a')
-            link = anchor.get_attribute('href')
-            player = {}
-            player['name'] = anchor.text
-            player['abbr'] = re.search(r"\w*\d{2}", link).group()
-            player['position'] = row[1].text
-            return player
-
-        players = [get_player(row) for row in table_rows]
+        players = list(map(NbaPlayer, table_rows))
         return {'players': players}
