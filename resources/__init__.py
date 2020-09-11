@@ -1,12 +1,9 @@
+from resources.db_manager import DbManager
 from resources.file_manager import FileManager
-from resources.validator import Validator
-from resources.key_store import KeyStore
 from crawlers import ScraperFactory
 
 class Resources:
-    def __init__(self, resource_type, args):
-        key_store = KeyStore(resource_type, args)
-        self.validator = Validator(key_store)
+    def __init__(self, key_store):
         self.file_manager = FileManager(key_store)
         self.scraper = ScraperFactory().get_scraper(key_store)
 
