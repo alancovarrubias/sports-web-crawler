@@ -3,16 +3,15 @@ import json
 
 client = MongoClient('mongodb://localhost:27017/')
 class DbManager:
-    def __init__(self):
-        self.db = client.crawler_db
-        self.collections = list(self.db.list_collection_names())
-    
-    def file_exists(self):
-        return self.collections
+    def __init__(self, key_store):
+        db = client[key_store.sport]
+        collection_names = db.list_collection_names()
+        self.collection = db[key_store.resource_type]
+        self.resource_exists = key_store.resource_type in collection_names
 
-    def insert_collection(self, content):
-        self.db
-        pass
+    def fetch_resource(self):
+        return self.collection.findOne({})
 
-    def read_json(self):
-        pass
+    def save_resource(self, data):
+        self.collection.insert_one(data).inserted_id
+        self.resource_exists = True

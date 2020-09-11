@@ -1,18 +1,17 @@
 from resources.db_manager import DbManager
-from resources.file_manager import FileManager
 from crawlers import ScraperFactory
 
 class Resources:
     def __init__(self, key_store):
-        self.file_manager = FileManager(key_store)
+        self.db_manager = DbManager(key_store)
         self.scraper = ScraperFactory().get_scraper(key_store)
 
     def fetch(self):
-        file_exists = self.file_manager.file_exists()
+        file_exists = self.db_manager.resource_exists()
         if file_exists:
-            return self.file_manager.read_json()
+            return self.db_manager.fetch_resource()
         else:
             resource_data = self.scraper.get_resource()
-            self.file_manager.save_json(resource_data)
+            self.db_manager.save_resource(resource_data)
             return resource_data
     
