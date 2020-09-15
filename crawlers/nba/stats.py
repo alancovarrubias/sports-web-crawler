@@ -25,7 +25,8 @@ class NbaStatsScraper(AbstractScraper):
             css_config = {'section': 'tfoot', 'cells': 'th, td'}
             basic_row = get_table_rows(basic_stats_table, css_config)[0]
             advanced_row = get_table_rows(advanced_stats_table, css_config)[0]
-            team_stat = NbaStat('Team', basic_row, advanced_row)
+            row = basic_row + advanced_row
+            team_stat = NbaStat('Team', row)
             return team_stat.toJson()
 
         def get_player_stats(tables):
@@ -37,7 +38,8 @@ class NbaStatsScraper(AbstractScraper):
             for basic_row, advanced_row in zip(basic_rows, advanced_rows):
                 if len(basic_row) <= 2:
                     continue
-                player_stat = NbaStat('Player', basic_row, advanced_row)
+                row = basic_row + advanced_row
+                player_stat = NbaStat('Player', row)
                 player_stats.append(player_stat.toJson())
             return player_stats
 

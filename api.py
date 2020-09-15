@@ -24,7 +24,7 @@ def get_resource(resource_type):
     key_store = KeyStore(resource_type, args)
     abort_if_invalid(key_store)
     resources = Resources(key_store)
-    return resources
+    return resources.fetch()
 
 
 class TeamResources(Resource):

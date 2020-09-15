@@ -13,7 +13,7 @@ class DbManager:
 
     def fetch_resource(self):
         resource = self.collection.find_one({})
-        json = loads(dumps(resource.fetch()))
+        json = loads(dumps(resource))
         json.pop('_id', None)
         return json
 

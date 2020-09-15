@@ -12,16 +12,13 @@ def type_rtg(rtg, model_type):
 
 
 class NbaStat(AbstractModel):
-    def __init__(self, model_type, row, advanced_row):
-        if model_type == PLAYER:
-            self.abbr = row[0].get_attribute('data-append-csv')
+    def __init__(self, model_type, row):
         self.model_type = model_type
-        advanced_row_text = [cell.text for cell in advanced_row]
-        self.ortg = type_rtg(advanced_row_text[14], model_type)
-        self.drtg = type_rtg(advanced_row_text[15], model_type)
         super().__init__(row)
 
     def build(self, row):
+        if self.model_type == PLAYER:
+            self.abbr = row[0].get_attribute('data-append-csv')
         row_text = [cell.text for cell in row]
         self.sp = get_sp(row_text[1])
         self.fg = int(row_text[2])
@@ -38,3 +35,5 @@ class NbaStat(AbstractModel):
         self.tov = int(row_text[17])
         self.pf = int(row_text[18])
         self.pts = int(row_text[19])
+        self.ortg = type_rtg(row_text[35], self.model_type)
+        self.drtg = type_rtg(row_text[36], self.model_type)
