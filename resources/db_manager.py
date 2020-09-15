@@ -1,7 +1,9 @@
 from pymongo import MongoClient
-import json
+from bson.json_util import dumps, loads
 
 client = MongoClient('mongodb://localhost:27017/')
+
+
 class DbManager:
     def __init__(self, key_store):
         db = client[key_store.sport]
@@ -10,7 +12,10 @@ class DbManager:
         self.resource_exists = key_store.resource_type in collection_names
 
     def fetch_resource(self):
-        return self.collection.findOne({})
+        resource = self.collection.find_one({})
+        json = loads(dumps(resource.fetch()))
+        json.pop('_id', None)
+        return json
 
     def save_resource(self, data):
         self.collection.insert_one(data).inserted_id

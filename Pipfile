@@ -10,6 +10,7 @@ flask-restful = "*"
 pymongo = "*"
 selenium = "*"
 webdriver-manager = "*"
+bson = "*"
 
 [requires]
 python_version = "3.8"

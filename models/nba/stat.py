@@ -1,12 +1,15 @@
 from models.abstract import AbstractModel
 from const.models import PLAYER
 
+
 def get_sp(data):
     mp = data.split(':')
     return int(mp[0])*60 if (len(mp) == 1) else int(mp[0])*60 + int(mp[1])
 
+
 def type_rtg(rtg, model_type):
     return int(rtg) if model_type == PLAYER else float(rtg)
+
 
 class NbaStat(AbstractModel):
     def __init__(self, model_type, row, advanced_row):
