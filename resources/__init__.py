@@ -8,7 +8,7 @@ class Resources:
         self.scraper = ScraperFactory().get_scraper(key_store)
 
     def fetch(self):
-        if not self.db_manager.resource_exists:
+        if not self.db_manager.resource_exists():
             resource_data = self.scraper.get_resource()
             self.db_manager.save_resource(resource_data)
         return self.db_manager.fetch_resource()
