@@ -8,6 +8,8 @@ def get_sp(data):
 
 
 def type_rtg(rtg, model_type):
+    if not rtg:
+        return None
     return int(rtg) if model_type == PLAYER else float(rtg)
 
 
