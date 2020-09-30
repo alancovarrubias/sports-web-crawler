@@ -20,17 +20,16 @@ class NbaStatsScraper(AbstractScraper):
         away_tables = stat_tables[:2]
         home_tables = stat_tables[2:]
 
-        def get_team_stat(team, tables):
+        def get_team_stats(tables):
             basic_stats_table, advanced_stats_table = tables
             css_config = {'section': 'tfoot', 'cells': 'th, td'}
             basic_row = get_table_rows(basic_stats_table, css_config)[0]
             advanced_row = get_table_rows(advanced_stats_table, css_config)[0]
             row = basic_row + advanced_row
             team_stat = NbaStat('Team', row).toJson()
-            team_stat['abbr'] = team
-            return team_stat
+            return [team_stat]
 
-        def get_player_stats(team, tables):
+        def get_player_stats(tables):
             basic_stats_table, advanced_stats_table = tables
             css_config = {'rows': 'tr:not(.thead)', 'cells': 'th, td'}
             basic_rows = get_table_rows(basic_stats_table, css_config)
@@ -41,12 +40,11 @@ class NbaStatsScraper(AbstractScraper):
                     continue
                 row = basic_row + advanced_row
                 player_stat = NbaStat('Player', row).toJson()
-                player_stat['team'] = team
                 player_stats.append(player_stat)
             return player_stats
 
-        away_player_stats = get_player_stats(away_team, away_tables)
-        home_player_stats = get_player_stats(home_team, home_tables)
-        away_team_stat = get_team_stat(away_team, away_tables)
-        home_team_stat = get_team_stat(home_team, home_tables)
-        return {'away_player_stats': away_player_stats, 'home_player_stats': home_player_stats, 'away_team_stat': away_team_stat, 'home_team_stat': home_team_stat}
+        away_player_stats = get_player_stats(away_tables)
+        home_player_stats = get_player_stats(home_tables)
+        away_team_stats = get_team_stats(away_tables)
+        home_team_stats = get_team_stats(home_tables)
+        return {'away_player_stats': away_player_stats, 'home_player_stats': home_player_stats, 'away_team_stats': away_team_stats, 'home_team_stats': home_team_stats}

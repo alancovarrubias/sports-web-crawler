@@ -3,6 +3,7 @@ from const.mlb import PITCHING, BATTING
 from const.models import TEAM, PLAYER
 from models.abstract import AbstractModel
 
+
 def convert_numeric(text):
     if len(text) == 0:
         return 0
@@ -10,6 +11,7 @@ def convert_numeric(text):
         return float(text)
     else:
         return int(text)
+
 
 def get_abbr(cell):
     anchor = cell.find_element_by_tag_name('a')

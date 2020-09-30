@@ -29,7 +29,7 @@ class MlbStatsScraper(AbstractScraper):
             batting_row = get_table_rows(batting_table, css_config)[0]
             team_pitching_stat = MlbStat(PITCHING, TEAM, pitching_row)
             team_batting_stat = MlbStat(BATTING, TEAM, batting_row)
-            return {BATTING: team_batting_stat.toJson(), PITCHING: team_pitching_stat.toJson()}
+            return [team_batting_stat.toJson(), team_pitching_stat.toJson()]
 
         def get_player_stats(tables):
             batting_table, pitching_table = tables
@@ -39,15 +39,15 @@ class MlbStatsScraper(AbstractScraper):
             pitching_stats = []
             for pitching_row in pitching_rows:
                 pitching_stat = MlbStat(PITCHING, PLAYER, pitching_row)
-                pitching_stats.append(pitching_stat)
+                pitching_stats.append(pitching_stat.toJson())
             batting_stats = []
             for batting_row in batting_rows:
                 batting_stat = MlbStat(BATTING, PLAYER, batting_row)
                 batting_stats.append(batting_stat.toJson())
-            return batting_stats
+            return batting_stats+pitching_stats
 
         away_player_stats = get_player_stats(away_tables)
         home_player_stats = get_player_stats(home_tables)
-        away_team_stat = get_team_stat(away_tables)
-        home_team_stat = get_team_stat(home_tables)
-        return {'away_player_stats': away_player_stats, 'home_player_stats': home_player_stats, 'away_team_stat': away_team_stat, 'home_team_stat': home_team_stat}
+        away_team_stats = get_team_stat(away_tables)
+        home_team_stats = get_team_stat(home_tables)
+        return {'away_player_stats': away_player_stats, 'home_player_stats': home_player_stats, 'away_team_stats': away_team_stats, 'home_team_stats': home_team_stats}
